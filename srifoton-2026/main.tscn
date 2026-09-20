@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://pmfxmlenu5o2"]
+
+[node name="Node2D" type="Node2D" unique_id=1819617941]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=219319349]
