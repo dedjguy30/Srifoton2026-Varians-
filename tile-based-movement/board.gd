@@ -3,7 +3,7 @@ extends Node2D
 
 
 # Ukuran satu cell grid dalam pixel.
-const TILE_SIZE: int = 16
+const TILE_SIZE: int = 32
 
 
 # Menyimpan object yang sedang menempati setiap cell grid.

@@ -8,13 +8,12 @@
 [ext_resource type="PackedScene" uid="uid://bte83xr2yhpak" path="res://goal.tscn" id="6_56xti"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_njr5j"]
-size = Vector2(16, 16)
+size = Vector2(32, 32)
 
 [node name="Level" type="Node2D" unique_id=869422144]
 script = ExtResource("1_6ih1o")
 
 [node name="CharacterBody2D" parent="." unique_id=2054219377 node_paths=PackedStringArray("board") instance=ExtResource("1_k0mgt")]
-position = Vector2(64, 64)
 board = NodePath("../Board")
 
 [node name="Wall" type="StaticBody2D" parent="." unique_id=344240829 node_paths=PackedStringArray("board")]
@@ -30,7 +29,9 @@ shape = SubResource("RectangleShape2D_njr5j")
 script = ExtResource("2_njr5j")
 
 [node name="Box" parent="." unique_id=1527761072 node_paths=PackedStringArray("board") instance=ExtResource("3_4xtnr")]
+scale = Vector2(2, 2)
 board = NodePath("../Board")
+required_push_strength = 1
 
 [node name="Goal" parent="." unique_id=2120722754 node_paths=PackedStringArray("board") instance=ExtResource("6_56xti")]
 position = Vector2(48, 160)

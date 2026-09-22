@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://3rym8vjf5fyy" path="res://icon.svg" id="2_oq5cr"]
 
 [node name="Box" type="Node2D" unique_id=1527761072]
-position = Vector2(82, 64)
+position = Vector2(96, 64)
 script = ExtResource("1_g2tbl")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=476476291]
