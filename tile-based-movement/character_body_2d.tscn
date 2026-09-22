@@ -13,9 +13,11 @@ script = ExtResource("1_f50pn")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1512328642]
 texture_filter = 1
+scale = Vector2(0.1, 0.1)
 texture = SubResource("CompressedTexture2D_186t8")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=731454550]
+scale = Vector2(0.1, 0.1)
 shape = SubResource("RectangleShape2D_13qdw")
 
 [node name="up" type="RayCast2D" parent="." unique_id=1694350696]

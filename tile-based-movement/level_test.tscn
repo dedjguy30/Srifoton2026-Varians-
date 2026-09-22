@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://danat3moxi4ht"]
+
+[ext_resource type="Script" uid="uid://cnsnuoa8rm0pg" path="res://level.gd" id="1_6ih1o"]
+[ext_resource type="PackedScene" uid="uid://bx0oek2oit0l" path="res://character_body_2d.tscn" id="1_k0mgt"]
+[ext_resource type="Script" uid="uid://csq3gm3pbbgl2" path="res://wall.gd" id="2_4xtnr"]
+[ext_resource type="Script" uid="uid://b5js0y13lyltr" path="res://board.gd" id="2_njr5j"]
+[ext_resource type="PackedScene" uid="uid://cv850nvpjg4sv" path="res://box.tscn" id="3_4xtnr"]
+[ext_resource type="PackedScene" uid="uid://bte83xr2yhpak" path="res://goal.tscn" id="6_56xti"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_njr5j"]
+size = Vector2(16, 16)
+
+[node name="Level" type="Node2D" unique_id=869422144]
+script = ExtResource("1_6ih1o")
+
+[node name="CharacterBody2D" parent="." unique_id=2054219377 node_paths=PackedStringArray("board") instance=ExtResource("1_k0mgt")]
+position = Vector2(64, 64)
+board = NodePath("../Board")
+
+[node name="Wall" type="StaticBody2D" parent="." unique_id=344240829 node_paths=PackedStringArray("board")]
+position = Vector2(256, 64)
+script = ExtResource("2_4xtnr")
+board = NodePath("../Board")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall" unique_id=1363039700]
+position = Vector2(7, -3)
+shape = SubResource("RectangleShape2D_njr5j")
+
+[node name="Board" type="Node2D" parent="." unique_id=1802599960]
+script = ExtResource("2_njr5j")
+
+[node name="Box" parent="." unique_id=1527761072 node_paths=PackedStringArray("board") instance=ExtResource("3_4xtnr")]
+board = NodePath("../Board")
+
+[node name="Goal" parent="." unique_id=2120722754 node_paths=PackedStringArray("board") instance=ExtResource("6_56xti")]
+position = Vector2(48, 160)
+board = NodePath("../Board")
+
+[connection signal="body_entered" from="Goal" to="Goal" method="_on_body_entered"]
