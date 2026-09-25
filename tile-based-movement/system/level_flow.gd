@@ -4,10 +4,6 @@ extends Node
 signal progress_changed
 
 
-# ==================================================
-# PATHS
-# ==================================================
-
 const LEVEL_FOLDER: String = "res://levels/"
 const LEVEL_PREFIX: String = "level_"
 
@@ -20,17 +16,20 @@ const SAVE_PATH: String = (
 )
 
 
-# ==================================================
-# RUNTIME
-# ==================================================
-
 var levels: Array[String] = []
 
-# Index level tertinggi yang sudah terbuka.
-# 0 = Level 1.
 var highest_unlocked_level: int = 0
 
 var current_level_index: int = 0
+
+
+# ==================================================
+# FREE PLAY
+# ==================================================
+
+# Tidak disimpan ke save.
+# Jadi saat game ditutup, kembali ke Normal Mode.
+var free_play_enabled: bool = false
 
 
 # ==================================================
@@ -39,11 +38,12 @@ var current_level_index: int = 0
 
 func _ready() -> void:
 	refresh_level_list()
+
 	load_progress()
 
 
 # ==================================================
-# AUTO FIND LEVELS
+# LEVEL DISCOVERY
 # ==================================================
 
 func refresh_level_list() -> void:
@@ -54,15 +54,18 @@ func refresh_level_list() -> void:
 	)
 
 	for raw_file_name in files:
-		var file_name: String = raw_file_name
+		var file_name: String = (
+			raw_file_name
+		)
 
-		# Berguna untuk hasil export Godot
-		# yang kadang memakai file .remap.
+		# Untuk exported game.
 		if file_name.ends_with(
 			".remap"
 		):
-			file_name = file_name.trim_suffix(
-				".remap"
+			file_name = (
+				file_name.trim_suffix(
+					".remap"
+				)
 			)
 
 		if not file_name.begins_with(
@@ -75,11 +78,12 @@ func refresh_level_list() -> void:
 		):
 			continue
 
-		if file_name == "level_template.tscn":
+		if file_name == (
+			"level_template.tscn"
+		):
 			continue
 
-
-		var full_path := (
+		var full_path: String = (
 			LEVEL_FOLDER
 			+ file_name
 		)
@@ -91,14 +95,7 @@ func refresh_level_list() -> void:
 			full_path
 		)
 
-
-	# Dengan nama:
-	# level_01
-	# level_02
-	# level_03
-	# urutannya otomatis benar.
 	levels.sort()
-
 
 	print(
 		"LEVELS FOUND: ",
@@ -131,7 +128,6 @@ func get_current_level_index() -> int:
 	if current_scene == null:
 		return current_level_index
 
-
 	var current_path: String = (
 		current_scene.scene_file_path
 	)
@@ -143,7 +139,9 @@ func get_current_level_index() -> int:
 	)
 
 	if found_index != -1:
-		current_level_index = found_index
+		current_level_index = (
+			found_index
+		)
 
 	return current_level_index
 
@@ -160,33 +158,33 @@ func load_level(
 	if levels.is_empty():
 		refresh_level_list()
 
-
 	if index < 0:
 		return
 
 	if index >= levels.size():
 		return
 
+	# Free Play otomatis boleh membuka semuanya.
+	var can_open: bool = (
+		ignore_lock
+		or free_play_enabled
+		or index <= highest_unlocked_level
+	)
 
-	if (
-		not ignore_lock
-		and index > highest_unlocked_level
-	):
+	if not can_open:
 		print(
 			"LEVEL LOCKED: ",
 			index + 1
 		)
+
 		return
 
-
 	current_level_index = index
-
 
 	print(
 		"LOAD LEVEL ",
 		index + 1
 	)
-
 
 	get_tree().change_scene_to_file(
 		levels[index]
@@ -194,7 +192,7 @@ func load_level(
 
 
 # ==================================================
-# COMPLETE / UNLOCK
+# LEVEL COMPLETE
 # ==================================================
 
 func complete_current_level() -> void:
@@ -204,21 +202,34 @@ func complete_current_level() -> void:
 	if levels.is_empty():
 		return
 
+	# ==================================================
+	# FREE PLAY
+	# ==================================================
+	#
+	# Menyelesaikan level dalam Free Play
+	# TIDAK mengubah save progress normal.
+	#
+	if free_play_enabled:
+		print(
+			"FREE PLAY | Progress tidak diubah."
+		)
 
-	var index := (
+		return
+
+
+	var index: int = (
 		get_current_level_index()
 	)
 
-	var next_index := (
+	var next_index: int = (
 		index + 1
 	)
 
-
-	# Kalau masih ada level berikutnya,
-	# buka level tersebut.
 	if next_index < levels.size():
-
-		if next_index > highest_unlocked_level:
+		if (
+			next_index
+			> highest_unlocked_level
+		):
 			highest_unlocked_level = (
 				next_index
 			)
@@ -244,34 +255,27 @@ func go_to_next_level() -> void:
 	if levels.is_empty():
 		return
 
-
-	var index := (
+	var index: int = (
 		get_current_level_index()
 	)
 
-
-	# Simpan progress SEBELUM pindah.
 	complete_current_level()
 
-
-	var next_index := (
+	var next_index: int = (
 		index + 1
 	)
 
-
-	# Level terakhir selesai.
 	if next_index >= levels.size():
-
 		print(
 			"SEMUA LEVEL SELESAI!"
 		)
 
 		go_to_level_select()
+
 		return
 
-
-	# ignore_lock true aman karena level
-	# tersebut baru saja di-unlock.
+	# Setelah menyelesaikan level,
+	# next level selalu boleh dimuat.
 	load_level(
 		next_index,
 		true
@@ -283,7 +287,7 @@ func go_to_next_level() -> void:
 # ==================================================
 
 func restart_current_level() -> void:
-	var index := (
+	var index: int = (
 		get_current_level_index()
 	)
 
@@ -298,6 +302,8 @@ func restart_current_level() -> void:
 # ==================================================
 
 func go_to_level_select() -> void:
+	get_tree().paused = false
+
 	get_tree().change_scene_to_file(
 		LEVEL_SELECT_SCENE
 	)
@@ -315,7 +321,6 @@ func save_progress() -> void:
 		"highest_unlocked_level",
 		highest_unlocked_level
 	)
-
 
 	var error := config.save(
 		SAVE_PATH
@@ -339,12 +344,9 @@ func load_progress() -> void:
 		SAVE_PATH
 	)
 
-
-	# Belum pernah main.
 	if error != OK:
 		highest_unlocked_level = 0
 		return
-
 
 	highest_unlocked_level = int(
 		config.get_value(
@@ -353,7 +355,6 @@ func load_progress() -> void:
 			0
 		)
 	)
-
 
 	if not levels.is_empty():
 		highest_unlocked_level = clamp(
@@ -380,16 +381,49 @@ func reset_progress() -> void:
 
 
 # ==================================================
-# HELPERS
+# FREE PLAY CONTROL
+# ==================================================
+
+func set_free_play(
+	enabled: bool
+) -> void:
+	free_play_enabled = enabled
+
+	print(
+		"FREE PLAY: ",
+		free_play_enabled
+	)
+
+	progress_changed.emit()
+
+
+func toggle_free_play() -> void:
+	set_free_play(
+		not free_play_enabled
+	)
+
+
+# ==================================================
+# LEVEL STATUS
 # ==================================================
 
 func is_level_unlocked(
 	index: int
 ) -> bool:
+
+	if index < 0:
+		return false
+
+	if index >= levels.size():
+		return false
+
+	# Semua terbuka ketika Free Play.
+	if free_play_enabled:
+		return true
+
 	return (
-		index >= 0
-		and index < levels.size()
-		and index <= highest_unlocked_level
+		index
+		<= highest_unlocked_level
 	)
 
 
@@ -403,6 +437,9 @@ func get_level_count() -> int:
 func get_unlocked_level_count() -> int:
 	if levels.is_empty():
 		return 0
+
+	if free_play_enabled:
+		return levels.size()
 
 	return min(
 		highest_unlocked_level + 1,
