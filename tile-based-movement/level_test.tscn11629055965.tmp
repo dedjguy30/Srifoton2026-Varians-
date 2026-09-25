@@ -1,0 +1,154 @@
+[gd_scene format=3 uid="uid://danat3moxi4ht"]
+
+[ext_resource type="Script" uid="uid://cnsnuoa8rm0pg" path="res://level.gd" id="1_6ih1o"]
+[ext_resource type="Script" uid="uid://csq3gm3pbbgl2" path="res://wall.gd" id="2_4xtnr"]
+[ext_resource type="PackedScene" uid="uid://tyfonpe3csvq" path="res://butterfly.tscn" id="2_25u55"]
+[ext_resource type="Script" uid="uid://b5js0y13lyltr" path="res://board.gd" id="2_njr5j"]
+[ext_resource type="PackedScene" uid="uid://cv850nvpjg4sv" path="res://box.tscn" id="3_4xtnr"]
+[ext_resource type="PackedScene" uid="uid://bte83xr2yhpak" path="res://goal.tscn" id="6_56xti"]
+[ext_resource type="PackedScene" uid="uid://c3jx86kfrgpy0" path="res://caterpilarP1.tscn" id="7_hpvma"]
+[ext_resource type="Script" uid="uid://bmttx0nsahku2" path="res://caterpilar.gd" id="8_k6i1l"]
+[ext_resource type="PackedScene" uid="uid://c4f1xbcfehun8" path="res://cocoon.tscn" id="10_lmggl"]
+[ext_resource type="PackedScene" uid="uid://dpjnvutc156vw" path="res://nectar.tscn" id="11_s67nh"]
+[ext_resource type="PackedScene" uid="uid://cqhgr7k4k5oeu" path="res://door.tscn" id="13_hua5b"]
+[ext_resource type="PackedScene" uid="uid://bvyk1g2qykytb" path="res://pressure_plate.tscn" id="14_joyim"]
+[ext_resource type="PackedScene" uid="uid://dimeqmvqlubui" path="res://spike_hazard.tscn" id="15_joyim"]
+[ext_resource type="PackedScene" uid="uid://dn8afwd1aj06r" path="res://beetle.tscn" id="15_u832s"]
+[ext_resource type="PackedScene" uid="uid://dc0poe8rtau33" path="res://grasshopper.tscn" id="16_psllt"]
+[ext_resource type="PackedScene" uid="uid://dcd6iqk0lwn0o" path="res://pit_hazard.tscn" id="16_u832s"]
+[ext_resource type="PackedScene" uid="uid://bko5ryk5xfll6" path="res://walker_enemy.tscn" id="17_psllt"]
+[ext_resource type="PackedScene" uid="uid://be5t3yhob7thl" path="res://chaser_enemy.tscn" id="17_tf44b"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_njr5j"]
+size = Vector2(32, 32)
+
+[sub_resource type="TileSet" id="TileSet_s67nh"]
+tile_size = Vector2i(48, 48)
+
+[sub_resource type="TileSet" id="TileSet_oxjef"]
+
+[node name="Level" type="Node2D" unique_id=869422144 node_paths=PackedStringArray("nectar_label", "level_complete_label")]
+script = ExtResource("1_6ih1o")
+nectar_label = NodePath("UI/Nectarlabel")
+level_complete_label = NodePath("UI/LevelCompleteLabel")
+butterfly_scene = ExtResource("2_25u55")
+
+[node name="Wall" type="StaticBody2D" parent="." unique_id=344240829 node_paths=PackedStringArray("board")]
+position = Vector2(128, 64)
+script = ExtResource("2_4xtnr")
+board = NodePath("../Board")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall" unique_id=1363039700]
+position = Vector2(7, -3)
+shape = SubResource("RectangleShape2D_njr5j")
+
+[node name="Board" type="Node2D" parent="." unique_id=1802599960]
+script = ExtResource("2_njr5j")
+
+[node name="Box" parent="." unique_id=1527761072 node_paths=PackedStringArray("board") instance=ExtResource("3_4xtnr")]
+scale = Vector2(2, 2)
+board = NodePath("../Board")
+
+[node name="Goal" parent="." unique_id=2120722754 node_paths=PackedStringArray("board") instance=ExtResource("6_56xti")]
+position = Vector2(48, 160)
+board = NodePath("../Board")
+
+[node name="CaterpilarP1" parent="." unique_id=1061426767 node_paths=PackedStringArray("board") groups=["characters"] instance=ExtResource("7_hpvma")]
+script = ExtResource("8_k6i1l")
+board = NodePath("../Board")
+push_strength = 0
+
+[node name="Cocoon" parent="." unique_id=411607518 node_paths=PackedStringArray("board") instance=ExtResource("10_lmggl")]
+position = Vector2(512, 512)
+board = NodePath("../Board")
+
+[node name="Nectar" parent="." unique_id=502529762 node_paths=PackedStringArray("board") instance=ExtResource("11_s67nh")]
+position = Vector2(64, 512)
+board = NodePath("../Board")
+
+[node name="Nectar2" parent="." unique_id=1837724417 node_paths=PackedStringArray("board") instance=ExtResource("11_s67nh")]
+position = Vector2(96, 512)
+board = NodePath("../Board")
+
+[node name="Nectar3" parent="." unique_id=2009265124 node_paths=PackedStringArray("board") instance=ExtResource("11_s67nh")]
+position = Vector2(128, 512)
+board = NodePath("../Board")
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=1912385441]
+
+[node name="Nectarlabel" type="Label" parent="UI" unique_id=425422613]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="LevelCompleteLabel" type="Label" parent="UI" unique_id=1506865263]
+offset_right = 40.0
+offset_bottom = 23.0
+text = "LEVEL COMPLETE!"
+
+[node name="Ground" type="TileMapLayer" parent="." unique_id=1324623245]
+tile_set = SubResource("TileSet_s67nh")
+
+[node name="Walls" type="TileMapLayer" parent="." unique_id=1059135760]
+tile_set = SubResource("TileSet_oxjef")
+
+[node name="door" parent="." unique_id=219956737 node_paths=PackedStringArray("board", "trigger_plates") instance=ExtResource("13_hua5b")]
+position = Vector2(432, 192)
+board = NodePath("../Board")
+trigger_plates = [NodePath("../pressure_plate"), NodePath("../pressure_plate2")]
+required_plates = 2
+
+[node name="pressure_plate" parent="." unique_id=976643670 node_paths=PackedStringArray("board") instance=ExtResource("14_joyim")]
+position = Vector2(240, 192)
+board = NodePath("../Board")
+
+[node name="pressure_plate2" parent="." unique_id=395046073 node_paths=PackedStringArray("board") instance=ExtResource("14_joyim")]
+position = Vector2(336, 192)
+board = NodePath("../Board")
+
+[node name="SpikeHazard" parent="." unique_id=529503518 node_paths=PackedStringArray("board") instance=ExtResource("15_joyim")]
+position = Vector2(144, 384)
+board = NodePath("../Board")
+
+[node name="SpikeHazard2" parent="." unique_id=1972849093 node_paths=PackedStringArray("board", "trigger_plates") instance=ExtResource("15_joyim")]
+position = Vector2(192, 384)
+board = NodePath("../Board")
+activation_mode = 1
+trigger_plates = [NodePath("../pressure_plate")]
+
+[node name="SpikeHazard3" parent="." unique_id=53022849 node_paths=PackedStringArray("board") instance=ExtResource("15_joyim")]
+position = Vector2(240, 384)
+board = NodePath("../Board")
+activation_mode = 2
+invert_activation = true
+required_nectar = 3
+
+[node name="PitHazard" parent="." unique_id=1760317524 node_paths=PackedStringArray("board") instance=ExtResource("16_u832s")]
+position = Vector2(48, 384)
+board = NodePath("../Board")
+
+[node name="GrassHopper" parent="." unique_id=1739458532 node_paths=PackedStringArray("board") groups=["characters"] instance=ExtResource("16_psllt")]
+position = Vector2(192, 192)
+board = NodePath("../Board")
+push_strength = 2
+is_active = false
+
+[node name="beetle" parent="." unique_id=2054219377 node_paths=PackedStringArray("board") groups=["characters"] instance=ExtResource("15_u832s")]
+board = NodePath("../Board")
+is_active = false
+
+[node name="WalkerEnemy" parent="." unique_id=1611463794 node_paths=PackedStringArray("board") instance=ExtResource("17_psllt")]
+position = Vector2(240, 96)
+movement_pattern = Array[int]([2, 0, 3, 1])
+board = NodePath("../Board")
+
+[node name="WalkerEnemy2" parent="." unique_id=2059514298 node_paths=PackedStringArray("board") instance=ExtResource("17_psllt")]
+position = Vector2(336, 192)
+movement_pattern = Array[int]([2, 0, 3, 1])
+board = NodePath("../Board")
+
+[node name="ChaserEnemy" parent="." unique_id=1599525994 instance=ExtResource("17_tf44b")]
+position = Vector2(576, 192)
+
+[connection signal="body_entered" from="Goal" to="Goal" method="_on_body_entered"]
+[connection signal="puzzle_completed" from="Goal" to="." method="_on_goal_puzzle_completed"]
+[connection signal="caterpillar_entered" from="Cocoon" to="." method="_on_cocoon_caterpillar_entered"]

@@ -10,7 +10,7 @@ const MOVE_DURATION: float = 0.185
 
 
 # Kekuatan minimum yang diperlukan untuk mendorong Box.
-@export var required_push_strength: int = 2
+@export var required_push_strength: int = 1
 
 
 @onready var sprite: Sprite2D = $Sprite2D
@@ -36,8 +36,10 @@ func _ready() -> void:
 	board.register_object(
 		grid_position,
 		self
+	
 	)
-
+		# Box boleh mengaktifkan Pressure Plate.
+	add_to_group("pressure_plate_activator")
 
 # Mengecek apakah karakter cukup kuat untuk mendorong Box.
 func can_be_pushed_by(pusher_strength: int) -> bool:

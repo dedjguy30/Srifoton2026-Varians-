@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://dcd6iqk0lwn0o"]
+
+[ext_resource type="Script" uid="uid://cq41gldb8da2l" path="res://pit_hazard.gd" id="1_vh6m4"]
+[ext_resource type="Texture2D" uid="uid://b53w8k2qe5hxt" path="res://misterius.png" id="2_xaty0"]
+
+[node name="PitHazard" type="Node2D" unique_id=1760317524]
+script = ExtResource("1_vh6m4")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=611282498]
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("2_xaty0")

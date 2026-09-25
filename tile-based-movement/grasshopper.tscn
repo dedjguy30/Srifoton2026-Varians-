@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://bx0oek2oit0l"]
+[gd_scene format=3 uid="uid://dc0poe8rtau33"]
 
-[ext_resource type="Script" uid="uid://d2ta0fohh7mux" path="res://character_body_2d.gd" id="1_f50pn"]
+[ext_resource type="Script" uid="uid://iiockfw2exvx" path="res://grasshopper.gd" id="1_jpr6r"]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_186t8"]
 load_path = "res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"
@@ -8,10 +8,10 @@ load_path = "res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.cte
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_13qdw"]
 size = Vector2(16, 16)
 
-[node name="CharacterBody2D" type="CharacterBody2D" unique_id=2054219377]
+[node name="GrassHopper" type="CharacterBody2D" unique_id=2054219377]
 position = Vector2(64, 64)
 scale = Vector2(2, 2)
-script = ExtResource("1_f50pn")
+script = ExtResource("1_jpr6r")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1512328642]
 texture_filter = 1

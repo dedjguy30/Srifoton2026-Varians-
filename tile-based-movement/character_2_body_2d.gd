@@ -1,0 +1,2 @@
+class_name GridCharacter2
+extends GridCharacter

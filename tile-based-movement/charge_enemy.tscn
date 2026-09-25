@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://d0usq2eunj1fv"]
+
+[ext_resource type="Script" uid="uid://bkqwwlj4tryhe" path="res://charge_enemy.gd" id="1_mardl"]
+[ext_resource type="Texture2D" uid="uid://hikvxx61g6om" path="res://usagi.png" id="2_iw8qf"]
+
+[node name="ChargeEnemy" type="Node2D" unique_id=1835634548]
+script = ExtResource("1_mardl")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2126883982]
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("2_iw8qf")

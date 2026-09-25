@@ -2,16 +2,27 @@ class_name Goal
 extends Area2D
 
 
+# Event kemenangan.
+# Level akan mendengarkan signal ini.
+signal puzzle_completed(
+	butterfly: ButterflyCharacter
+)
+
+
 # Board milik level.
 @export var board: Board
 
 
-# Jumlah Nectar yang dibutuhkan untuk menang.
-@export var required_nectar: int = 1
+# Butterfly wajib membawa tepat 3 Nectar.
+@export var required_nectar: int = 3
 
 
-# Posisi Goal dalam grid.
+# Posisi Goal pada grid.
 var grid_position: Vector2i
+
+
+# Mencegah Goal mengirim kemenangan berkali-kali.
+var is_completed: bool = false
 
 
 func _ready() -> void:
@@ -19,28 +30,38 @@ func _ready() -> void:
 		push_error("Goal belum terhubung ke Board!")
 		return
 
-	grid_position = board.world_to_grid(global_position)
+	# Goal mengikuti grid tetapi tidak menjadi blocking object.
+	grid_position = board.world_to_grid(
+		global_position
+	)
 
-	global_position = board.grid_to_world(grid_position)
+	global_position = board.grid_to_world(
+		grid_position
+	)
 
 
 func _on_body_entered(body: Node2D) -> void:
-	print("GOAL DETECT: ", body.name)
-
-	# Hanya Butterfly yang relevan untuk Goal.
-	if not body.is_in_group("butterfly"):
-		print("GOAL IGNORE: actor bukan Butterfly")
+	# Kalau level sudah selesai, tidak perlu cek lagi.
+	if is_completed:
 		return
 
-	# Butterfly nantinya harus mempunyai fungsi ini.
-	if not body.has_method("get_nectar_count"):
-		push_warning(
-			"Butterfly tidak memiliki get_nectar_count()"
+	print(
+		"GOAL DETECT: ",
+		body.name
+	)
+
+	# Sekarang Butterfly asli sudah ada,
+	# jadi Goal bisa mengecek class secara langsung.
+	if not body is ButterflyCharacter:
+		print(
+			"GOAL IGNORE: bukan Butterfly"
 		)
 		return
 
-	var nectar_count: int = int(
-		body.call("get_nectar_count")
+	var butterfly := body as ButterflyCharacter
+
+	var nectar_count: int = (
+		butterfly.get_nectar_count()
 	)
 
 	print(
@@ -48,4 +69,26 @@ func _on_body_entered(body: Node2D) -> void:
 		nectar_count,
 		"/",
 		required_nectar
+	)
+
+	# Harus tepat 3/3.
+	if nectar_count != required_nectar:
+		print(
+			"GOAL LOCKED: Nectar belum lengkap"
+		)
+		return
+
+	# Kondisi kemenangan terpenuhi.
+	is_completed = true
+
+	print(
+		"PUZZLE COMPLETE! Butterfly membawa ",
+		nectar_count,
+		"/",
+		required_nectar,
+		" Nectar."
+	)
+
+	puzzle_completed.emit(
+		butterfly
 	)

@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://b4oa2kdto4q1a"]
+
+[ext_resource type="Script" uid="uid://bbuqkrcykwt2h" path="res://menus/level_select.gd" id="1_x5a0v"]
+
+[node name="LevelSelect" type="Control" unique_id=27507480]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_x5a0v")
+
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=2042536221]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer" unique_id=503411734]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="CenterContainer/VBoxContainer" unique_id=1771729998]
+layout_mode = 2
+text = "SELECT LEVEL"
+
+[node name="ProgressLabel" type="Label" parent="CenterContainer/VBoxContainer" unique_id=778215166]
+layout_mode = 2
+text = "RESET PROGRESS"
+
+[node name="LevelButtons" type="VBoxContainer" parent="CenterContainer/VBoxContainer" unique_id=1467509982]
+layout_mode = 2
+
+[node name="ResetProgress" type="Button" parent="CenterContainer/VBoxContainer" unique_id=1545632989]
+layout_mode = 2
+text = "RESET PROGRESS"
