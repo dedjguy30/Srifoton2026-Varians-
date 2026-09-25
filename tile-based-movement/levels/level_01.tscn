@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://cjvseacp3hjh4" path="res://beetle.tscn" id="9_oogjq"]
 [ext_resource type="PackedScene" uid="uid://56x833c7fq1n" path="res://box.tscn" id="12_xw3ee"]
 [ext_resource type="PackedScene" path="res://door.tscn" id="13_l0eo6"]
+[ext_resource type="PackedScene" path="res://pressure_plate.tscn" id="14_d3o6j"]
 [ext_resource type="PackedScene" path="res://cocoon.tscn" id="17_dwiu5"]
 [ext_resource type="PackedScene" uid="uid://bte83xr2yhpak" path="res://goal.tscn" id="18_d42df"]
 [ext_resource type="PackedScene" uid="uid://dpjnvutc156vw" path="res://nectar.tscn" id="22_3iphv"]
@@ -967,26 +968,34 @@ position = Vector2(384, 192)
 position = Vector2(48, 192)
 
 [node name="Goal" parent="Objects" unique_id=2120722754 instance=ExtResource("18_d42df")]
-position = Vector2(959.99994, 192)
+position = Vector2(983.99994, 168)
 
 [node name="Box" parent="Objects" unique_id=1527761072 instance=ExtResource("12_xw3ee")]
-position = Vector2(240, 144)
+position = Vector2(264, 120)
 
-[node name="door" parent="Objects" unique_id=1816496118 instance=ExtResource("13_l0eo6")]
+[node name="door" parent="Objects" unique_id=1816496118 node_paths=PackedStringArray("trigger_plates") instance=ExtResource("13_l0eo6")]
 position = Vector2(168, 216)
+trigger_plates = [NodePath("../pressure_plate"), NodePath("../pressure_plate2")]
+required_plates = 2
+
+[node name="pressure_plate" parent="Objects" unique_id=976643670 instance=ExtResource("14_d3o6j")]
+position = Vector2(984, 264)
+
+[node name="pressure_plate2" parent="Objects" unique_id=2134503238 instance=ExtResource("14_d3o6j")]
+position = Vector2(984, 312)
 
 [node name="Hazards" type="Node2D" parent="." unique_id=1119006952]
 
 [node name="Collecibles" type="Node2D" parent="." unique_id=403704943]
 
 [node name="Nectar" parent="Collecibles" unique_id=502529762 instance=ExtResource("22_3iphv")]
-position = Vector2(432, 528)
+position = Vector2(408, 72)
 
 [node name="Nectar2" parent="Collecibles" unique_id=1837724417 instance=ExtResource("22_3iphv")]
-position = Vector2(96, 624)
+position = Vector2(168, 552)
 
 [node name="Nectar3" parent="Collecibles" unique_id=2009265124 instance=ExtResource("22_3iphv")]
-position = Vector2(624, 96)
+position = Vector2(1128, 312)
 
 [node name="Authoring" type="Node2D" parent="." unique_id=1167579906]
 script = ExtResource("23_24auh")
