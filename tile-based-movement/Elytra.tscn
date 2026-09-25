@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dr31tk0jg38rh"]
 
 [ext_resource type="Script" uid="uid://p7fhwi3fk0og" path="res://elytra.gd" id="1_c67oh"]
-[ext_resource type="Texture2D" uid="uid://no5npkcahfbp" path="res://images.jpg" id="2_1fj5f"]
+[ext_resource type="Texture2D" uid="uid://no5npkcahfbp" path="res://tutorials/level_01/slide_02.jpg" id="2_1fj5f"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_13qdw"]
 size = Vector2(48, 48)

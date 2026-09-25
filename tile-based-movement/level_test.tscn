@@ -3,29 +3,29 @@
 [ext_resource type="Script" uid="uid://cnsnuoa8rm0pg" path="res://level.gd" id="1_6ih1o"]
 [ext_resource type="PackedScene" uid="uid://tyfonpe3csvq" path="res://butterfly.tscn" id="2_25u55"]
 [ext_resource type="Script" uid="uid://b5js0y13lyltr" path="res://board.gd" id="2_njr5j"]
-[ext_resource type="PackedScene" uid="uid://cv850nvpjg4sv" path="res://box.tscn" id="3_4xtnr"]
+[ext_resource type="PackedScene" path="res://box.tscn" id="3_4xtnr"]
 [ext_resource type="Texture2D" uid="uid://ds8k3v7pideoi" path="res://Tilemap_color1.png" id="4_ka5y7"]
 [ext_resource type="Script" uid="uid://da7vhbx265ank" path="res://wall_tile_layer.gd" id="4_yi082"]
 [ext_resource type="PackedScene" uid="uid://bte83xr2yhpak" path="res://goal.tscn" id="6_56xti"]
 [ext_resource type="PackedScene" uid="uid://c3jx86kfrgpy0" path="res://caterpilarP1.tscn" id="7_hpvma"]
 [ext_resource type="Script" uid="uid://bmttx0nsahku2" path="res://caterpilar.gd" id="8_k6i1l"]
-[ext_resource type="PackedScene" uid="uid://c4f1xbcfehun8" path="res://cocoon.tscn" id="10_lmggl"]
+[ext_resource type="PackedScene" path="res://cocoon.tscn" id="10_lmggl"]
 [ext_resource type="PackedScene" uid="uid://dpjnvutc156vw" path="res://nectar.tscn" id="11_s67nh"]
-[ext_resource type="PackedScene" uid="uid://cqhgr7k4k5oeu" path="res://door.tscn" id="13_hua5b"]
-[ext_resource type="PackedScene" uid="uid://bvyk1g2qykytb" path="res://pressure_plate.tscn" id="14_joyim"]
+[ext_resource type="PackedScene" path="res://door.tscn" id="13_hua5b"]
+[ext_resource type="PackedScene" path="res://pressure_plate.tscn" id="14_joyim"]
 [ext_resource type="PackedScene" uid="uid://dimeqmvqlubui" path="res://spike_hazard.tscn" id="15_joyim"]
 [ext_resource type="PackedScene" uid="uid://cjvseacp3hjh4" path="res://beetle.tscn" id="15_u832s"]
 [ext_resource type="PackedScene" uid="uid://dc0poe8rtau33" path="res://grasshopper.tscn" id="16_psllt"]
 [ext_resource type="PackedScene" uid="uid://dcd6iqk0lwn0o" path="res://pit_hazard.tscn" id="16_u832s"]
-[ext_resource type="PackedScene" uid="uid://bko5ryk5xfll6" path="res://walker_enemy.tscn" id="17_psllt"]
-[ext_resource type="PackedScene" uid="uid://be5t3yhob7thl" path="res://chaser_enemy.tscn" id="17_tf44b"]
+[ext_resource type="PackedScene" path="res://walker_enemy.tscn" id="17_psllt"]
+[ext_resource type="PackedScene" path="res://chaser_enemy.tscn" id="17_tf44b"]
 [ext_resource type="PackedScene" uid="uid://d0usq2eunj1fv" path="res://charge_enemy.tscn" id="19_jp4br"]
 [ext_resource type="PackedScene" uid="uid://dr31tk0jg38rh" path="res://Elytra.tscn" id="20_20ank"]
 [ext_resource type="Script" uid="uid://cxk25ooyj5uy7" path="res://level_authoring.gd" id="23_rs0pw"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_rs0pw"]
 texture = ExtResource("4_ka5y7")
-texture_region_size = Vector2i(48, 48)
+texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 1:0/0 = 0
 2:0/0 = 0
@@ -721,6 +721,7 @@ texture_region_size = Vector2i(48, 48)
 35:23/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_oxjef"]
+tile_size = Vector2i(48, 48)
 sources/0 = SubResource("TileSetAtlasSource_rs0pw")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ka5y7"]
