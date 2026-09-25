@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://56x833c7fq1n" path="res://box.tscn" id="13_gfkio"]
 [ext_resource type="PackedScene" path="res://door.tscn" id="14_50fh4"]
 [ext_resource type="PackedScene" uid="uid://dcd6iqk0lwn0o" path="res://pit_hazard.tscn" id="15_icmn4"]
+[ext_resource type="PackedScene" path="res://pressure_plate.tscn" id="16_50fh4"]
 [ext_resource type="PackedScene" path="res://cocoon.tscn" id="17_5n45u"]
 [ext_resource type="PackedScene" uid="uid://bte83xr2yhpak" path="res://goal.tscn" id="18_f1l0e"]
 [ext_resource type="PackedScene" uid="uid://dpjnvutc156vw" path="res://nectar.tscn" id="22_kdw0q"]
@@ -970,7 +971,7 @@ push_strength = 0
 [node name="Objects" type="Node2D" parent="." unique_id=1596570283]
 
 [node name="Cocoon" parent="Objects" unique_id=411607518 instance=ExtResource("17_5n45u")]
-position = Vector2(768, 288)
+position = Vector2(792, 312)
 
 [node name="Goal" parent="Objects" unique_id=2120722754 instance=ExtResource("18_f1l0e")]
 position = Vector2(96, 576)
@@ -998,6 +999,9 @@ position = Vector2(360, 312)
 
 [node name="PitHazard6" parent="Objects" unique_id=1694772939 instance=ExtResource("15_icmn4")]
 position = Vector2(312, 312)
+
+[node name="pressure_plate" parent="Objects" unique_id=976643670 instance=ExtResource("16_50fh4")]
+position = Vector2(216, 312)
 
 [node name="Hazards" type="Node2D" parent="." unique_id=1119006952]
 
