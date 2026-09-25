@@ -145,7 +145,7 @@ func create_active_indicator() -> void:
 	# Lebih turun / lebih dekat ke kepala.
 	active_indicator.position = Vector2(
 		0,
-		-20
+		-25
 	)
 
 	active_indicator.z_index = 10
