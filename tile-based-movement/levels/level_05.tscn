@@ -16,7 +16,6 @@
 [ext_resource type="PackedScene" uid="uid://cjvseacp3hjh4" path="res://beetle.tscn" id="9_ck07j"]
 [ext_resource type="PackedScene" uid="uid://dc0poe8rtau33" path="res://grasshopper.tscn" id="10_4ukmx"]
 [ext_resource type="Texture2D" uid="uid://cu1a2ghpa14go" path="res://aset/Harvest Sumer Free Ver. Pack/Harvest Sumer Free Ver. Pack/tilesets/Set 1.0.png" id="10_c4ago"]
-[ext_resource type="PackedScene" uid="uid://dr31tk0jg38rh" path="res://Elytra.tscn" id="11_c4ago"]
 [ext_resource type="PackedScene" uid="uid://tt1ch6og7d3r" path="res://cocoon.tscn" id="12_a45jb"]
 [ext_resource type="Texture2D" uid="uid://g20di05oootd" path="res://aset/Harvest Sumer Free Ver. Pack/Harvest Sumer Free Ver. Pack/Vegetation/Trees 3.png" id="12_nb100"]
 [ext_resource type="PackedScene" uid="uid://bte83xr2yhpak" path="res://goal.tscn" id="13_ukmku"]
@@ -29199,15 +29198,14 @@ position = Vector2(264, 120)
 position = Vector2(648, 312)
 push_strength = 0
 
-[node name="Elytra" parent="Characters" unique_id=18229231 instance=ExtResource("11_c4ago")]
-position = Vector2(552.00006, 120)
-scale = Vector2(0.7, 0.7)
-push_strength = 0
-
 [node name="Enemies" type="Node2D" parent="." unique_id=1675993605]
 
 [node name="ChaserEnemy" parent="Enemies" unique_id=1599525994 instance=ExtResource("22_hsx28")]
 position = Vector2(840, 216)
+detection_radius = 4
+
+[node name="ChaserEnemy2" parent="Enemies" unique_id=1465828099 instance=ExtResource("22_hsx28")]
+position = Vector2(864, 384)
 detection_radius = 4
 
 [node name="WalkerEnemy" parent="Enemies" unique_id=1611463794 instance=ExtResource("23_6tpke")]

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://doqcnsnml1b1j"
-path="res://.godot/imported/9.jpeg-babde430f5e53b342440dba84380ee99.ctex"
+uid="uid://bhnwmp3mbnw2w"
+path="res://.godot/imported/slide_17.jpeg-819ec9f0461bbbf148548ce6d5dd9fa4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://asetTutorial/9.jpeg"
-dest_files=["res://.godot/imported/9.jpeg-babde430f5e53b342440dba84380ee99.ctex"]
+source_file="res://tutorials/level_02/slide_17.jpeg"
+dest_files=["res://.godot/imported/slide_17.jpeg-819ec9f0461bbbf148548ce6d5dd9fa4.ctex"]
 
 [params]
 
