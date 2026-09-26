@@ -35,6 +35,7 @@ var is_level_complete: bool = false
 # ==================================================
 
 func _ready() -> void:
+	AudioManager.play_stage_bgm()
 	print(
 		"=== SCENE YANG JALAN: ",
 		get_tree().current_scene.scene_file_path,
@@ -330,8 +331,10 @@ func activate_character_at(
 
 func ensure_active_character() -> void:
 	# ==================================================
-	# APAKAH MASIH ADA ACTIVE CHARACTER YANG HIDUP?
+	# FIND ALL ACTIVE + ALIVE CHARACTERS
 	# ==================================================
+
+	var active_indices: Array[int] = []
 
 	for i in range(
 		characters.size()
@@ -347,25 +350,47 @@ func ensure_active_character() -> void:
 			continue
 
 		if character.is_active:
-			active_character_index = i
-			return
-
-
-	# ==================================================
-	# ACTIVE LAMA SUDAH MATI
-	# ==================================================
-
-	# Matikan status active semua Character,
-	# termasuk Character mati.
-	for character in characters:
-		if is_instance_valid(
-			character
-		):
-			character.set_active(
-				false
+			active_indices.append(
+				i
 			)
 
 
+	# ==================================================
+	# THERE IS AT LEAST ONE ACTIVE CHARACTER
+	# ==================================================
+
+	if not active_indices.is_empty():
+		var chosen_index: int = (
+			active_indices[0]
+		)
+
+		# Kalau index Level sekarang masih termasuk
+		# Character aktif yang valid, pertahankan dia.
+		if active_indices.has(
+			active_character_index
+		):
+			chosen_index = (
+				active_character_index
+			)
+
+		# PENTING:
+		# activate_character_at() mematikan SEMUA dulu,
+		# baru menyalakan satu Character.
+		#
+		# Jadi kalau bug membuat 2 Character aktif,
+		# kondisi itu langsung dibersihkan.
+		activate_character_at(
+			chosen_index
+		)
+
+		return
+
+
+	# ==================================================
+	# NO ACTIVE CHARACTER
+	# ==================================================
+
+	# Misalnya Character aktif baru saja mati.
 	# Cari Character hidup pertama.
 	for i in range(
 		characters.size()
@@ -380,26 +405,20 @@ func ensure_active_character() -> void:
 		if not character.is_alive:
 			continue
 
-		active_character_index = i
-
-		character.set_active(
-			true
-		)
-
-		print(
-			"Auto active character: ",
-			character.name
+		activate_character_at(
+			i
 		)
 
 		return
 
 
-	# Tidak ada Character hidup.
+	# ==================================================
+	# EVERY CHARACTER IS DEAD
+	# ==================================================
+
 	active_character_index = -1
 
-	print(
-		"Semua Character mati. Z / R masih tersedia."
-	)
+	
 
 # ==================================================
 # SWITCH CHARACTER
@@ -850,6 +869,7 @@ func _on_butterfly_nectar_changed(
 	current: int,
 	maximum: int
 ) -> void:
+	AudioManager.play_nectar()
 	update_nectar_ui(
 		current,
 		maximum
@@ -879,6 +899,7 @@ func complete_level(
 		return
 
 	is_level_complete = true
+	AudioManager.play_win()
 
 	for character in characters:
 		if is_instance_valid(
@@ -979,6 +1000,18 @@ func _on_hazard_triggered(
 		"hazard_vulnerable"
 	):
 		return
+
+	# Flying Butterfly aman dari Pit.
+	if (
+		hazard.is_in_group("pit_hazard")
+		and object is GridCharacter
+	):
+		var character := (
+			object as GridCharacter
+		)
+
+		if character.can_cross_pit():
+			return
 
 	if not object.has_method(
 		"defeat"

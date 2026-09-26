@@ -1,7 +1,7 @@
-[gd_scene format=3 uid="uid://cqhgr7k4k5oeu"]
+[gd_scene format=3 uid="uid://ddp0oi1gujx8b"]
 
 [ext_resource type="Script" uid="uid://c52qb33jv75cd" path="res://door.gd" id="1_ba8gm"]
-[ext_resource type="Texture2D" uid="uid://3rym8vjf5fyy" path="res://icon.svg" id="2_v6xrn"]
+[ext_resource type="Texture2D" uid="uid://cn0j3jnxd234h" path="res://asetSprite/Door.png" id="2_v6xrn"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hun61"]
 size = Vector2(48, 48)
@@ -10,7 +10,7 @@ size = Vector2(48, 48)
 script = ExtResource("1_ba8gm")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=731230240]
-scale = Vector2(0.2, 0.2)
+scale = Vector2(0.05, 0.05)
 texture = ExtResource("2_v6xrn")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1939109962]

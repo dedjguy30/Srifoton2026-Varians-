@@ -17,7 +17,7 @@
 [ext_resource type="PackedScene" uid="uid://dc0poe8rtau33" path="res://grasshopper.tscn" id="10_4ukmx"]
 [ext_resource type="Texture2D" uid="uid://cu1a2ghpa14go" path="res://aset/Harvest Sumer Free Ver. Pack/Harvest Sumer Free Ver. Pack/tilesets/Set 1.0.png" id="10_c4ago"]
 [ext_resource type="PackedScene" uid="uid://dr31tk0jg38rh" path="res://Elytra.tscn" id="11_c4ago"]
-[ext_resource type="PackedScene" uid="uid://c4f1xbcfehun8" path="res://cocoon.tscn" id="12_a45jb"]
+[ext_resource type="PackedScene" uid="uid://tt1ch6og7d3r" path="res://cocoon.tscn" id="12_a45jb"]
 [ext_resource type="Texture2D" uid="uid://g20di05oootd" path="res://aset/Harvest Sumer Free Ver. Pack/Harvest Sumer Free Ver. Pack/Vegetation/Trees 3.png" id="12_nb100"]
 [ext_resource type="PackedScene" uid="uid://bte83xr2yhpak" path="res://goal.tscn" id="13_ukmku"]
 [ext_resource type="Texture2D" uid="uid://bubj5ph6mfc4j" path="res://aset/Tiny Swords (Free Pack)/Tiny Swords (Free Pack)/Terrain/Resources/Wood/Trees/Tree2.png" id="13_w6hu8"]
@@ -25,14 +25,14 @@
 [ext_resource type="PackedScene" uid="uid://dpjnvutc156vw" path="res://nectar.tscn" id="14_hsx28"]
 [ext_resource type="Script" uid="uid://cxk25ooyj5uy7" path="res://level_authoring.gd" id="15_6tpke"]
 [ext_resource type="Texture2D" uid="uid://dg3s6jo8l3jk0" path="res://aset/PNG/Assets_shadow/Bush_simple2_1.png" id="16_c4ago"]
-[ext_resource type="PackedScene" uid="uid://be5t3yhob7thl" path="res://chaser_enemy.tscn" id="22_hsx28"]
-[ext_resource type="PackedScene" uid="uid://bko5ryk5xfll6" path="res://walker_enemy.tscn" id="23_6tpke"]
+[ext_resource type="PackedScene" uid="uid://co7ikqfckxsk0" path="res://chaser_enemy.tscn" id="22_hsx28"]
+[ext_resource type="PackedScene" uid="uid://bmkaap53lkjyo" path="res://walker_enemy.tscn" id="23_6tpke"]
 [ext_resource type="PackedScene" uid="uid://d0usq2eunj1fv" path="res://charge_enemy.tscn" id="24_mskhr"]
 [ext_resource type="PackedScene" uid="uid://dcd6iqk0lwn0o" path="res://pit_hazard.tscn" id="26_6jcg3"]
-[ext_resource type="PackedScene" uid="uid://cv850nvpjg4sv" path="res://box.tscn" id="27_4gc8e"]
-[ext_resource type="PackedScene" uid="uid://cqhgr7k4k5oeu" path="res://door.tscn" id="28_4bf8o"]
+[ext_resource type="PackedScene" uid="uid://56x833c7fq1n" path="res://box.tscn" id="27_4gc8e"]
+[ext_resource type="PackedScene" uid="uid://ddp0oi1gujx8b" path="res://door.tscn" id="28_4bf8o"]
 [ext_resource type="PackedScene" uid="uid://dimeqmvqlubui" path="res://spike_hazard.tscn" id="30_1l0i4"]
-[ext_resource type="PackedScene" uid="uid://bvyk1g2qykytb" path="res://pressure_plate.tscn" id="31_kufmo"]
+[ext_resource type="PackedScene" uid="uid://pfiioya6orke" path="res://pressure_plate.tscn" id="31_kufmo"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_a45jb"]
 texture = ExtResource("4_j10hr")
@@ -29228,7 +29228,7 @@ detection_range = 4
 position = Vector2(504, 312)
 
 [node name="Goal" parent="Objects" unique_id=2120722754 instance=ExtResource("13_ukmku")]
-position = Vector2(48, 160)
+position = Vector2(144, 240)
 
 [node name="Box" parent="Objects" unique_id=1527761072 instance=ExtResource("27_4gc8e")]
 position = Vector2(168, 120)
@@ -29287,22 +29287,22 @@ position = Vector2(552, 360)
 position = Vector2(936, 72)
 activation_mode = 1
 invert_activation = true
-hide_when_inactive = false
 trigger_plates = [NodePath("../pressure_plate"), NodePath("../pressure_plate2"), NodePath("../pressure_plate3")]
+required_plates = 3
 
 [node name="SpikeHazard2" parent="Hazards" unique_id=1026470595 node_paths=PackedStringArray("trigger_plates") instance=ExtResource("30_1l0i4")]
 position = Vector2(936, 120)
 activation_mode = 1
 invert_activation = true
-hide_when_inactive = false
 trigger_plates = [NodePath("../pressure_plate"), NodePath("../pressure_plate2"), NodePath("../pressure_plate3")]
+required_plates = 3
 
 [node name="SpikeHazard3" parent="Hazards" unique_id=1637114947 node_paths=PackedStringArray("trigger_plates") instance=ExtResource("30_1l0i4")]
 position = Vector2(984, 120)
 activation_mode = 1
 invert_activation = true
-hide_when_inactive = false
 trigger_plates = [NodePath("../pressure_plate"), NodePath("../pressure_plate2"), NodePath("../pressure_plate3")]
+required_plates = 3
 
 [node name="pressure_plate" parent="Hazards" unique_id=976643670 instance=ExtResource("31_kufmo")]
 position = Vector2(216, 456)

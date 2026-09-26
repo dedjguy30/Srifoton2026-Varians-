@@ -224,14 +224,24 @@ func move_object(
 
 func undo_last_turn() -> bool:
 	if turn_history.is_empty():
+		print("UNDO | HISTORY EMPTY")
 		return false
 
 	var turn: Array = (
 		turn_history.pop_back()
 	)
 
-	# Undo dari action terakhir
-	# menuju action pertama.
+	print(
+		"=============================="
+	)
+
+	print(
+		"UNDO TURN START | Actions: ",
+		turn.size()
+	)
+
+
+	# Undo action terakhir -> pertama.
 	for i in range(
 		turn.size() - 1,
 		-1,
@@ -248,15 +258,37 @@ func undo_last_turn() -> bool:
 			)
 		)
 
+		print(
+			"UNDO ACTION | Index: ",
+			i,
+			" | Type: ",
+			action_type,
+			" | Keys: ",
+			action.keys()
+		)
 
-		# ------------------------------------------
-		# MOVEMENT UNDO
-		# ------------------------------------------
+
+		# ==================================================
+		# MOVE
+		# ==================================================
 
 		if action_type == "move":
-			var object: Node2D = (
-				action["object"]
+			var object = (
+				action.get(
+					"object",
+					null
+				)
 			)
+
+			if not is_instance_valid(
+				object
+			):
+				push_warning(
+					"UNDO MOVE | object invalid"
+				)
+
+				continue
+
 
 			var from_cell: Vector2i = (
 				action["from_cell"]
@@ -266,12 +298,7 @@ func undo_last_turn() -> bool:
 				action["to_cell"]
 			)
 
-			if not is_instance_valid(
-				object
-			):
-				continue
 
-			# Balik occupancy.
 			occupants.erase(
 				to_cell
 			)
@@ -280,7 +307,7 @@ func undo_last_turn() -> bool:
 				object
 			)
 
-			# Balik visual + logical position.
+
 			if object.has_method(
 				"snap_to_cell"
 			):
@@ -295,8 +322,7 @@ func undo_last_turn() -> bool:
 					)
 				)
 
-			# Puzzle seperti Pressure Plate
-			# juga menerima movement Undo.
+
 			object_moved.emit(
 				object,
 				to_cell,
@@ -304,37 +330,75 @@ func undo_last_turn() -> bool:
 			)
 
 
-		# ------------------------------------------
-		# CUSTOM GAMEPLAY UNDO
-		# ------------------------------------------
+		# ==================================================
+		# CUSTOM
+		# ==================================================
 
 		elif action_type == "custom":
+			if not action.has(
+				"undo_callable"
+			):
+				push_error(
+					"UNDO CUSTOM ERROR | "
+					+ "undo_callable tidak ada | "
+					+ str(action)
+				)
+
+				continue
+
+
 			var undo_callable: Callable = (
-				action[
+				action.get(
 					"undo_callable"
-				]
+				)
 			)
+
+
+			if not undo_callable.is_valid():
+				push_error(
+					"UNDO CUSTOM ERROR | "
+					+ "Callable invalid | "
+					+ str(action)
+				)
+
+				continue
+
 
 			var data: Dictionary = (
-				action["data"]
+				action.get(
+					"data",
+					{}
+				)
 			)
 
-			if undo_callable.is_valid():
-				undo_callable.call(
-					data
-				)
+
+			print(
+				"UNDO CUSTOM CALL | ",
+				undo_callable
+			)
+
+
+			undo_callable.call(
+				data
+			)
+
+
+		else:
+			push_warning(
+				"UNDO | Unknown action type: "
+				+ action_type
+			)
 
 
 	print(
-		"UNDO | Actions: ",
-		turn.size(),
-		" | History left: ",
-		turn_history.size()
+		"UNDO TURN FINISHED"
+	)
+
+	print(
+		"=============================="
 	)
 
 	return true
-
-
 # ==================================================
 # CUSTOM TURN ACTION
 # ==================================================

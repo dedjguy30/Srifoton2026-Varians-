@@ -45,7 +45,8 @@ func _on_body_entered(body: Node2D) -> void:
 	caterpillar,
 	self
 )
-
+	AudioManager.play_nectar()
+	
 func deactivate_cocoon() -> void:
 	visible = false
 	set_deferred("monitoring", false)

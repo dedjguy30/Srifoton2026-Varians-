@@ -8,6 +8,19 @@ extends Node2D
 
 @export var board: Board
 
+const BOUNCE_DURATION: float = 0.16
+const BOUNCE_HEIGHT: float = 6.0
+
+const AFTERIMAGE_LIFETIME: float = 0.18
+const AFTERIMAGE_ALPHA: float = 0.42
+
+
+# ==================================================
+# NODE REFERENCES
+# ==================================================
+
+@onready var sprite = $Sprite2D
+
 
 # ==================================================
 # RUNTIME DATA
@@ -16,14 +29,20 @@ extends Node2D
 var grid_position: Vector2i = Vector2i.ZERO
 var is_alive: bool = true
 
-
-# Kalau Player sengaja berjalan ke Enemy,
-# Enemy tersebut dianggap sudah melakukan action.
-#
-# Jadi ketika enemy turn dimulai pada commit,
-# Enemy ini tidak bergerak untuk kedua kalinya.
 var skip_next_turn: bool = false
 
+# HANYA untuk visual.
+# Tidak mengatur logical movement.
+var move_tween: Tween
+
+# Menyimpan local position asli sprite.
+# Berguna untuk Undo / snap.
+var sprite_home_position: Vector2 = Vector2.ZERO
+var death_tween: Tween
+
+var death_sprite_home_scale: Vector2
+var death_sprite_home_rotation: float
+var death_sprite_home_modulate: Color
 
 # ==================================================
 # READY
@@ -33,6 +52,12 @@ func _ready() -> void:
 	add_to_group("enemies")
 	add_to_group("pressure_plate_activator")
 	add_to_group("hazard_vulnerable")
+
+	if sprite != null:
+		sprite_home_position = sprite.position
+		death_sprite_home_scale = sprite.scale
+		death_sprite_home_rotation = sprite.rotation
+		death_sprite_home_modulate = sprite.modulate
 
 	if board == null:
 		push_error(
@@ -70,20 +95,6 @@ func _on_turn_about_to_commit() -> void:
 	if not is_alive:
 		return
 
-
-	# ==================================================
-	# ALREADY ATE PLAYER THIS TURN
-	# ==================================================
-
-	# Contoh:
-	#
-	# P E
-	#
-	# Player maju ke E.
-	# Enemy langsung makan Player.
-	#
-	# Enemy tersebut tidak boleh bergerak
-	# sekali lagi di enemy phase yang sama.
 	if skip_next_turn:
 		skip_next_turn = false
 
@@ -95,19 +106,41 @@ func _on_turn_about_to_commit() -> void:
 
 		return
 
-
 	take_turn()
 
 
-# Child Enemy override fungsi ini.
 func take_turn() -> void:
 	pass
 
 
 # ==================================================
-# NORMAL MOVEMENT
+# FACING
 # ==================================================
 
+func update_facing(
+	direction: Vector2i
+) -> void:
+	if sprite == null:
+		return
+
+	if direction.x < 0:
+		sprite.flip_h = true
+
+	elif direction.x > 0:
+		sprite.flip_h = false
+
+
+# ==================================================
+# LOGICAL MOVEMENT
+# ==================================================
+
+# PENTING:
+#
+# Fungsi ini TIDAK memiliki Tween / bounce.
+#
+# Charger memanggil fungsi ini berkali-kali
+# dalam satu serangan, jadi logical movement
+# harus selalu langsung selesai.
 func move_enemy(
 	direction: Vector2i
 ) -> bool:
@@ -115,6 +148,9 @@ func move_enemy(
 		return false
 
 	if not is_alive:
+		return false
+
+	if direction == Vector2i.ZERO:
 		return false
 
 	var target_cell: Vector2i = (
@@ -141,20 +177,214 @@ func move_enemy(
 		grid_position
 	)
 
+	update_facing(
+		direction
+	)
+
 	return true
+
+
+# ==================================================
+# BOUNCE VISUAL
+# ==================================================
+
+# Dipanggil CHILD enemy setelah move_enemy()
+# berhasil.
+#
+# Logic sudah selesai.
+# Ini cuma menggerakkan sprite.
+func play_bounce_from(
+	old_visual_position: Vector2
+) -> void:
+	if sprite == null:
+		return
+
+	var target_visual_position: Vector2 = (
+		sprite.global_position
+	)
+
+	if move_tween:
+		move_tween.kill()
+
+	sprite.global_position = (
+		old_visual_position
+	)
+
+	var middle_position: Vector2 = (
+		old_visual_position.lerp(
+			target_visual_position,
+			0.5
+		)
+	)
+
+	middle_position.y -= BOUNCE_HEIGHT
+
+	move_tween = create_tween()
+
+	move_tween.set_process_mode(
+		Tween.TWEEN_PROCESS_PHYSICS
+	)
+
+	# Naik.
+	move_tween.tween_property(
+		sprite,
+		"global_position",
+		middle_position,
+		BOUNCE_DURATION * 0.5
+	).set_trans(
+		Tween.TRANS_SINE
+	).set_ease(
+		Tween.EASE_OUT
+	)
+
+	# Turun / landing.
+	move_tween.tween_property(
+		sprite,
+		"global_position",
+		target_visual_position,
+		BOUNCE_DURATION * 0.5
+	).set_trans(
+		Tween.TRANS_SINE
+	).set_ease(
+		Tween.EASE_IN
+	)
+
+
+# ==================================================
+# MOTION AFTERIMAGE
+# ==================================================
+
+# Dipakai Charger untuk efek slide.
+func create_motion_afterimage() -> void:
+	if sprite == null:
+		return
+
+	var ghost := Sprite2D.new()
+
+	var frame_texture: Texture2D = null
+
+
+	# ==================================================
+	# NORMAL SPRITE2D
+	# ==================================================
+
+	if sprite is Sprite2D:
+		var source := (
+			sprite as Sprite2D
+		)
+
+		frame_texture = source.texture
+
+		if frame_texture == null:
+			return
+
+		ghost.centered = source.centered
+		ghost.offset = source.offset
+
+		ghost.flip_h = source.flip_h
+		ghost.flip_v = source.flip_v
+
+
+	# ==================================================
+	# ANIMATED SPRITE2D
+	# ==================================================
+
+	elif sprite is AnimatedSprite2D:
+		var source := (
+			sprite as AnimatedSprite2D
+		)
+
+		if source.sprite_frames == null:
+			return
+
+		frame_texture = (
+			source.sprite_frames.get_frame_texture(
+				source.animation,
+				source.frame
+			)
+		)
+
+		if frame_texture == null:
+			return
+
+		ghost.centered = source.centered
+		ghost.offset = source.offset
+
+		ghost.flip_h = source.flip_h
+		ghost.flip_v = source.flip_v
+
+	else:
+		return
+
+
+	ghost.texture = frame_texture
+
+	ghost.texture_filter = (
+		sprite.texture_filter
+	)
+
+	ghost.modulate = Color(
+		1.0,
+		1.0,
+		1.0,
+		AFTERIMAGE_ALPHA
+	)
+
+	var visual_transform: Transform2D = (
+		sprite.global_transform
+	)
+
+	var ghost_parent: Node = get_parent()
+
+	if ghost_parent == null:
+		ghost_parent = (
+			get_tree().current_scene
+		)
+
+	if ghost_parent == null:
+		ghost.queue_free()
+		return
+
+	ghost_parent.add_child(
+		ghost
+	)
+
+	ghost.global_transform = (
+		visual_transform
+	)
+
+	ghost.z_index = (
+		sprite.z_index - 1
+	)
+
+
+	# ==================================================
+	# FADE
+	# ==================================================
+
+	var fade_tween: Tween = (
+		ghost.create_tween()
+	)
+
+	fade_tween.tween_property(
+		ghost,
+		"modulate:a",
+		0.0,
+		AFTERIMAGE_LIFETIME
+	)
+
+	fade_tween.tween_callback(
+		Callable(
+			ghost,
+			"queue_free"
+		)
+	)
 
 
 # ==================================================
 # PLAYER WALKS INTO ENEMY
 # ==================================================
 
-# Dipanggil kalau Player SENDIRI memilih
-# bergerak ke cell Enemy.
-#
-# Enemy tetap diam.
-# Character langsung mati.
-#
-# Action tersebut tetap dianggap valid turn.
 func eat_character_from_player_move(
 	character: GridCharacter
 ) -> bool:
@@ -173,11 +403,6 @@ func eat_character_from_player_move(
 	if character.board != board:
 		return false
 
-
-	# ==================================================
-	# KILL CHARACTER
-	# ==================================================
-
 	var defeated: bool = (
 		character.defeat()
 	)
@@ -185,14 +410,6 @@ func eat_character_from_player_move(
 	if not defeated:
 		return false
 
-
-	# ==================================================
-	# ENEMY COUNTS AS ALREADY ACTED
-	# ==================================================
-
-	# Ketika Board.commit_turn() nanti
-	# memanggil semua Enemy,
-	# Enemy ini tidak bertindak lagi.
 	skip_next_turn = true
 
 	print(
@@ -209,16 +426,6 @@ func eat_character_from_player_move(
 # ENEMY MOVES INTO CHARACTER
 # ==================================================
 
-# Ini kebalikan dari fungsi di atas.
-#
-# Dipakai saat ENEMY yang mendekati Character.
-#
-# Contoh Chaser:
-#
-# E → P
-#
-# Character mati,
-# lalu Enemy masuk ke cell bekas Character.
 func move_or_attack_character(
 	direction: Vector2i
 ) -> bool:
@@ -241,7 +448,7 @@ func move_or_attack_character(
 
 
 	# ==================================================
-	# EMPTY CELL
+	# EMPTY
 	# ==================================================
 
 	if target_object == null:
@@ -256,7 +463,8 @@ func move_or_attack_character(
 
 	if target_object is GridCharacter:
 		var character := (
-			target_object as GridCharacter
+			target_object
+			as GridCharacter
 		)
 
 		if not character.is_alive:
@@ -269,27 +477,127 @@ func move_or_attack_character(
 		if not defeated:
 			return false
 
-		# Character sudah unregister dari Board.
-		# Enemy sekarang masuk ke cell bekas Character.
 		return move_enemy(
 			direction
 		)
 
 
-	# ==================================================
-	# OTHER BLOCKER
-	# ==================================================
-
-	# Wall
-	# Box
-	# Door
-	# Enemy lain
-	# dll.
 	return false
 
-
 # ==================================================
-# ENEMY DEATH
+# DEATH VISUAL - FLASH SHRINK
+# ==================================================
+
+func play_death_animation() -> void:
+	if is_alive:
+		return
+
+	if sprite == null:
+		visible = false
+		return
+
+	if death_tween:
+		death_tween.kill()
+
+	if move_tween:
+		move_tween.kill()
+
+
+	# Reset visual dulu.
+	sprite.position = sprite_home_position
+	sprite.scale = death_sprite_home_scale
+	sprite.rotation = death_sprite_home_rotation
+	sprite.modulate = death_sprite_home_modulate
+
+
+	# ==================================================
+	# FLASH
+	# ==================================================
+
+	sprite.modulate = Color(
+		2.0,
+		2.0,
+		2.0,
+		1.0
+	)
+
+
+	death_tween = create_tween()
+
+	death_tween.set_process_mode(
+		Tween.TWEEN_PROCESS_PHYSICS
+	)
+
+
+	# Flash sebentar.
+	death_tween.tween_interval(
+		0.06
+	)
+
+
+	# Balik ke warna normal.
+	death_tween.tween_property(
+		sprite,
+		"modulate",
+		death_sprite_home_modulate,
+		0.04
+	)
+
+
+	# ==================================================
+	# SHRINK
+	# ==================================================
+
+	death_tween.tween_property(
+		sprite,
+		"scale",
+		Vector2(
+			death_sprite_home_scale.x * 0.05,
+			death_sprite_home_scale.y * 0.05
+		),
+		0.13
+	).set_trans(
+		Tween.TRANS_BACK
+	).set_ease(
+		Tween.EASE_IN
+	)
+
+
+	death_tween.parallel().tween_property(
+		sprite,
+		"modulate:a",
+		0.0,
+		0.11
+	)
+
+
+	death_tween.finished.connect(
+		_finish_enemy_death_animation
+	)
+
+
+func _finish_enemy_death_animation() -> void:
+	if is_alive:
+		return
+
+	visible = false
+
+
+func reset_enemy_death_visual() -> void:
+	if death_tween:
+		death_tween.kill()
+
+	death_tween = null
+
+	if sprite == null:
+		return
+
+	sprite.position = sprite_home_position
+	sprite.scale = death_sprite_home_scale
+	sprite.rotation = death_sprite_home_rotation
+	sprite.modulate = death_sprite_home_modulate
+# ==================================================
+# DEATH
 # ==================================================
 
 func defeat() -> bool:
@@ -306,11 +614,6 @@ func defeat() -> bool:
 	var previous_visible: bool = (
 		visible
 	)
-
-
-	# ==================================================
-	# SAVE UNDO
-	# ==================================================
 
 	var recorded: bool = (
 		board.append_action_to_current_turn({
@@ -335,12 +638,8 @@ func defeat() -> bool:
 		push_warning(
 			"Enemy defeat terjadi di luar turn aktif."
 		)
+
 		return false
-
-
-	# ==================================================
-	# REMOVE FROM BOARD
-	# ==================================================
 
 	if board.get_object_at(
 		death_cell
@@ -350,13 +649,16 @@ func defeat() -> bool:
 			self
 		)
 
-
-	# ==================================================
-	# DEAD STATE
-	# ==================================================
+	if move_tween:
+		move_tween.kill()
 
 	is_alive = false
-	visible = false
+	AudioManager.play_death()
+	visible = true
+
+	call_deferred(
+	"play_death_animation"
+)
 
 	print(
 		"ENEMY DEFEATED | ",
@@ -369,7 +671,7 @@ func defeat() -> bool:
 
 
 # ==================================================
-# UNDO ENEMY DEATH
+# UNDO DEATH
 # ==================================================
 
 func _undo_defeat(
@@ -396,7 +698,8 @@ func _undo_defeat(
 		return
 
 	is_alive = true
-
+	reset_enemy_death_visual()
+	
 	visible = data[
 		"previous_visible"
 	]
@@ -406,6 +709,14 @@ func _undo_defeat(
 	global_position = board.grid_to_world(
 		grid_position
 	)
+
+	if move_tween:
+		move_tween.kill()
+
+	if sprite != null:
+		sprite.position = (
+			sprite_home_position
+		)
 
 	print(
 		"UNDO ENEMY DEATH | ",
@@ -420,8 +731,27 @@ func _undo_defeat(
 func snap_to_cell(
 	cell: Vector2i
 ) -> void:
+	if move_tween:
+		move_tween.kill()
+
 	grid_position = cell
 
 	global_position = board.grid_to_world(
 		grid_position
+	)
+
+	if sprite != null:
+		sprite.position = (
+			sprite_home_position
+		)
+
+
+# ==================================================
+# VISUAL MOVEMENT STATE
+# ==================================================
+
+func is_moving() -> bool:
+	return (
+		move_tween != null
+		and move_tween.is_running()
 	)

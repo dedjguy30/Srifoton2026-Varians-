@@ -170,6 +170,7 @@ func open_door() -> void:
 		return
 
 	is_open = true
+	AudioManager.play_door()
 	visible = false
 
 	if collision_shape:

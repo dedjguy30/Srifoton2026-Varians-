@@ -105,6 +105,7 @@ func use_skill() -> bool:
 		)
 
 		if success:
+			AudioManager.play_push()
 			moved_any_character = true
 
 			print(
@@ -113,7 +114,7 @@ func use_skill() -> bool:
 				" → ",
 				landing_cell
 			)
-
+	
 	return moved_any_character
 
 

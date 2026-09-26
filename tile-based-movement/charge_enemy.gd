@@ -8,47 +8,61 @@ extends GridEnemy
 
 @export_group("Charger Settings")
 
-
-# Seberapa jauh Charger bisa melihat Character
-# dalam satu garis lurus.
-#
-# Contoh:
-# 4 = pendek
-# 6 = normal
-# 10 = jauh
 @export_range(1, 20, 1)
 var detection_range: int = 6
 
-
-# Berapa turn Charger menunggu setelah
-# mendeteksi Character sebelum menyerang.
-#
-# Contoh:
-# 1 = cepat
-# 2 = normal / recommended
-# 3 = lebih mudah dihindari
 @export_range(1, 5, 1)
 var charge_delay_turns: int = 2
+
+
+# Waktu visual untuk setiap tile yang dilewati.
+const CHARGE_VISUAL_STEP_DURATION: float = 0.055
+
+# Interval pembuatan bayangan.
+const CHARGE_TRAIL_INTERVAL: float = 0.035
 
 
 # ==================================================
 # RUNTIME DATA
 # ==================================================
 
-# Apakah Charger sedang mempersiapkan serangan.
 var is_charging: bool = false
 
-
-# Berapa turn charging yang sudah dilewati.
 var charge_turn_counter: int = 0
 
-
-# Arah serangan yang dikunci saat
-# Character pertama kali terdeteksi.
-#
-# Player boleh bergerak setelah itu,
-# tetapi Charger tetap menyerang arah lama.
 var charge_direction: Vector2i = Vector2i.ZERO
+
+
+# Khusus VISUAL.
+var charge_visual_active: bool = false
+
+var charge_trail_timer: float = 0.0
+
+
+# ==================================================
+# PROCESS VISUAL TRAIL
+# ==================================================
+
+func _process(
+	delta: float
+) -> void:
+	if not charge_visual_active:
+		return
+
+	if not is_alive:
+		charge_visual_active = false
+		return
+
+	charge_trail_timer -= delta
+
+	if charge_trail_timer > 0.0:
+		return
+
+	create_motion_afterimage()
+
+	charge_trail_timer = (
+		CHARGE_TRAIL_INTERVAL
+	)
 
 
 # ==================================================
@@ -59,28 +73,22 @@ func take_turn() -> void:
 	if board == null:
 		return
 
-	# Kalau sudah charging,
-	# lanjutkan countdown.
 	if is_charging:
 		continue_charging()
 		return
 
-	# Belum charging:
-	# cari Character dalam satu garis lurus.
 	var target: GridCharacter = (
 		find_visible_character()
 	)
 
-	# Tidak melihat Character.
 	if target == null:
 		print(
 			"CHARGER IDLE | ",
 			name
 		)
+
 		return
 
-	# Character terlihat.
-	# Mulai charging dan kunci arah.
 	start_charging(
 		target
 	)
@@ -102,22 +110,20 @@ func start_charging(
 	if direction == Vector2i.ZERO:
 		return
 
-	# Simpan state sebelum berubah
-	# supaya Undo bisa membatalkan charging.
 	save_charge_state_undo()
 
 	is_charging = true
+
 	charge_turn_counter = 0
 
-	# Arah dikunci SEKARANG.
-	#
-	# Misalnya target berada di kanan:
-	#
-	# E . . C
-	#
-	# walaupun C kemudian bergerak ke atas,
-	# Charger tetap menyerang ke kanan.
 	charge_direction = direction
+
+
+	# Langsung menghadap arah target.
+	update_facing(
+		direction
+	)
+
 
 	print(
 		"CHARGER START CHARGING | ",
@@ -132,12 +138,10 @@ func start_charging(
 # ==================================================
 
 func continue_charging() -> void:
-	# Simpan state sebelum counter berubah.
 	save_charge_state_undo()
 
 	charge_turn_counter += 1
 
-	# Belum selesai charging.
 	if charge_turn_counter < charge_delay_turns:
 		print(
 			"CHARGER CHARGING | ",
@@ -147,22 +151,22 @@ func continue_charging() -> void:
 			"/",
 			charge_delay_turns
 		)
+
 		return
 
 
-	# ==================================================
-	# CHARGE READY
-	# ==================================================
-
-	# Simpan arah serangan sebelum
-	# state Charging dibersihkan.
 	var attack_direction: Vector2i = (
 		charge_direction
 	)
 
 	is_charging = false
+
 	charge_turn_counter = 0
-	charge_direction = Vector2i.ZERO
+
+	charge_direction = (
+		Vector2i.ZERO
+	)
+
 
 	print(
 		"CHARGER ATTACK | ",
@@ -170,6 +174,7 @@ func continue_charging() -> void:
 		" | Direction: ",
 		attack_direction
 	)
+
 
 	perform_charge(
 		attack_direction
@@ -180,15 +185,6 @@ func continue_charging() -> void:
 # FIND TARGET
 # ==================================================
 
-# Mencari Character yang:
-#
-# - berada satu garis horizontal / vertical
-# - berada dalam detection_range
-# - masih terdaftar di Board
-# - tidak ada blocker di tengah
-#
-# Kalau ada beberapa Character,
-# pilih yang paling dekat.
 func find_visible_character() -> GridCharacter:
 	var nearest: GridCharacter = null
 	var nearest_distance: int = 999999
@@ -199,19 +195,13 @@ func find_visible_character() -> GridCharacter:
 		if not node is GridCharacter:
 			continue
 
-		var character := node as GridCharacter
+		var character := (
+			node as GridCharacter
+		)
 
-		# Harus memakai Board yang sama.
 		if character.board != board:
 			continue
 
-		# Character harus benar-benar masih
-		# berada dalam occupancy Board.
-		#
-		# Ini penting untuk Character yang:
-		# - sudah transform
-		# - nanti mati
-		# - sedang tidak berada di arena
 		if board.get_object_at(
 			character.grid_position
 		) != character:
@@ -222,14 +212,6 @@ func find_visible_character() -> GridCharacter:
 			- grid_position
 		)
 
-		# Charger hanya mendeteksi:
-		#
-		# ↑
-		# ↓
-		# ←
-		# →
-		#
-		# Bukan diagonal.
 		var same_row: bool = (
 			difference.y == 0
 		)
@@ -246,17 +228,14 @@ func find_visible_character() -> GridCharacter:
 			+ abs(difference.y)
 		)
 
-		# Target terlalu jauh.
 		if distance > detection_range:
 			continue
 
-		# Ada blocker di tengah.
 		if not has_clear_line_to(
 			character.grid_position
 		):
 			continue
 
-		# Ambil Character terdekat.
 		if distance < nearest_distance:
 			nearest = character
 			nearest_distance = distance
@@ -268,10 +247,6 @@ func find_visible_character() -> GridCharacter:
 # LINE OF SIGHT
 # ==================================================
 
-# Mengecek cell DI ANTARA Charger dan target.
-#
-# Cell Character target sendiri tidak dihitung
-# sebagai blocker.
 func has_clear_line_to(
 	target_cell: Vector2i
 ) -> bool:
@@ -289,9 +264,6 @@ func has_clear_line_to(
 	)
 
 	while check_cell != target_cell:
-		# Wall, Box, Door tertutup,
-		# Character lain, Enemy lain, dll
-		# memutus line of sight.
 		if board.is_occupied(
 			check_cell
 		):
@@ -313,16 +285,28 @@ func get_direction_to_cell(
 		target_cell - grid_position
 	)
 
-	if difference.x > 0 and difference.y == 0:
+	if (
+		difference.x > 0
+		and difference.y == 0
+	):
 		return Vector2i.RIGHT
 
-	if difference.x < 0 and difference.y == 0:
+	if (
+		difference.x < 0
+		and difference.y == 0
+	):
 		return Vector2i.LEFT
 
-	if difference.y > 0 and difference.x == 0:
+	if (
+		difference.y > 0
+		and difference.x == 0
+	):
 		return Vector2i.DOWN
 
-	if difference.y < 0 and difference.x == 0:
+	if (
+		difference.y < 0
+		and difference.x == 0
+	):
 		return Vector2i.UP
 
 	return Vector2i.ZERO
@@ -332,23 +316,31 @@ func get_direction_to_cell(
 # CHARGE ATTACK
 # ==================================================
 
-# Charger bergerak lurus dalam arah yang
-# sudah dikunci ketika mulai charging.
-#
-# Untuk SEKARANG:
-# semua occupant Board masih menjadi blocker.
-#
-# Jadi kalau Character ada di depannya:
-# Charger berhenti tepat sebelum Character.
-#
-# Nanti saat Character Death System kita pasang,
-# bagian ini akan kita upgrade supaya Charger
-# benar-benar bisa menabrak / membunuh Character.
 func perform_charge(
 	direction: Vector2i
 ) -> void:
 	if direction == Vector2i.ZERO:
 		return
+
+	update_facing(
+		direction
+	)
+
+
+	# ==================================================
+	# SAVE VISUAL START
+	# ==================================================
+
+	var charge_start_visual_position: Vector2 = (
+		sprite.global_position
+	)
+
+	var moved_steps: int = 0
+
+
+	# ==================================================
+	# LOGICAL CHARGE
+	# ==================================================
 
 	for step in range(
 		detection_range
@@ -367,12 +359,16 @@ func perform_charge(
 		# ==================================================
 
 		if target_object == null:
-			var moved: bool = move_enemy(
-				direction
+			var moved: bool = (
+				move_enemy(
+					direction
+				)
 			)
 
 			if not moved:
 				break
+
+			moved_steps += 1
 
 			continue
 
@@ -383,7 +379,8 @@ func perform_charge(
 
 		if target_object is GridCharacter:
 			var character := (
-				target_object as GridCharacter
+				target_object
+				as GridCharacter
 			)
 
 			if character.is_alive:
@@ -399,18 +396,25 @@ func perform_charge(
 				)
 
 				if defeated:
-					# Masuk cell bekas Character.
-					move_enemy(
-						direction
+					# Character sudah keluar
+					# dari occupancy Board.
+					#
+					# Charger masuk ke cell-nya.
+					var entered_cell: bool = (
+						move_enemy(
+							direction
+						)
 					)
 
-			# Setelah menghantam Character,
-			# Charger langsung berhenti.
+					if entered_cell:
+						moved_steps += 1
+
+			# Serangan berhenti setelah impact.
 			break
 
 
 		# ==================================================
-		# WALL / BOX / DOOR / ENEMY
+		# BLOCKER
 		# ==================================================
 
 		print(
@@ -423,6 +427,17 @@ func perform_charge(
 		break
 
 
+	# ==================================================
+	# PLAY VISUAL AFTER LOGIC IS FINISHED
+	# ==================================================
+
+	if moved_steps > 0:
+		_play_charge_visual(
+			charge_start_visual_position,
+			moved_steps
+		)
+
+
 	print(
 		"CHARGER STOP | ",
 		name,
@@ -432,17 +447,117 @@ func perform_charge(
 
 
 # ==================================================
+# CHARGE VISUAL
+# ==================================================
+
+func _play_charge_visual(
+	start_visual_position: Vector2,
+	moved_steps: int
+) -> void:
+	if sprite == null:
+		return
+
+	var target_visual_position: Vector2 = (
+		sprite.global_position
+	)
+
+	if move_tween:
+		move_tween.kill()
+
+
+	# Logical root sudah berada di final cell.
+	#
+	# Sprite saja kita kembalikan ke titik awal.
+	sprite.global_position = (
+		start_visual_position
+	)
+
+
+	charge_visual_active = true
+
+	charge_trail_timer = 0.0
+
+
+	# Ghost pertama.
+	create_motion_afterimage()
+
+
+	var duration: float = (
+		CHARGE_VISUAL_STEP_DURATION
+		* float(moved_steps)
+	)
+
+	# Jangan sampai animasi terlalu singkat.
+	duration = max(
+		duration,
+		0.07
+	)
+
+
+	move_tween = create_tween()
+
+	move_tween.set_process_mode(
+		Tween.TWEEN_PROCESS_PHYSICS
+	)
+
+	move_tween.tween_property(
+		sprite,
+		"global_position",
+		target_visual_position,
+		duration
+	).set_trans(
+		Tween.TRANS_LINEAR
+	)
+
+	move_tween.finished.connect(
+		_on_charge_visual_finished
+	)
+
+
+func _on_charge_visual_finished() -> void:
+	charge_visual_active = false
+
+	# Pastikan visual benar-benar menyatu
+	# dengan root di akhir charge.
+	if sprite != null:
+		sprite.position = (
+			sprite_home_position
+		)
+
+
+# ==================================================
+# SNAP / UNDO
+# ==================================================
+
+func snap_to_cell(
+	cell: Vector2i
+) -> void:
+	charge_visual_active = false
+
+	super.snap_to_cell(
+		cell
+	)
+
+
+# ==================================================
+# DEATH
+# ==================================================
+
+func defeat() -> bool:
+	var defeated: bool = (
+		super.defeat()
+	)
+
+	if defeated:
+		charge_visual_active = false
+
+	return defeated
+
+
+# ==================================================
 # UNDO CHARGE STATE
 # ==================================================
 
-# Menyimpan state Charger dalam current turn.
-#
-# Jadi Z bukan cuma mengembalikan posisi,
-# tetapi juga:
-#
-# charging / tidak
-# counter
-# arah yang dikunci
 func save_charge_state_undo() -> void:
 	board.append_action_to_current_turn({
 		"type": "custom",
@@ -453,15 +568,18 @@ func save_charge_state_undo() -> void:
 		),
 
 		"data": {
-			"is_charging": is_charging,
-			"charge_turn_counter": charge_turn_counter,
-			"charge_direction": charge_direction
+			"is_charging":
+				is_charging,
+
+			"charge_turn_counter":
+				charge_turn_counter,
+
+			"charge_direction":
+				charge_direction
 		}
 	})
 
 
-# Mengembalikan state Charging
-# sebelum Player turn tadi.
 func _undo_charge_state(
 	data: Dictionary
 ) -> void:
@@ -476,6 +594,28 @@ func _undo_charge_state(
 	charge_direction = data[
 		"charge_direction"
 	]
+
+	charge_visual_active = false
+
+	if move_tween:
+		move_tween.kill()
+
+	if sprite != null:
+		sprite.position = (
+			sprite_home_position
+		)
+
+	# Saat kembali ke charging state,
+	# hadapkan sprite ke arah charge.
+	if (
+		is_charging
+		and charge_direction
+		!= Vector2i.ZERO
+	):
+		update_facing(
+			charge_direction
+		)
+
 
 	print(
 		"UNDO CHARGER STATE | ",

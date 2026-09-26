@@ -1,11 +1,11 @@
-[gd_scene format=3 uid="uid://be5t3yhob7thl"]
+[gd_scene format=3 uid="uid://co7ikqfckxsk0"]
 
 [ext_resource type="Script" uid="uid://co78qgp7sd5u6" path="res://chaser_enemy.gd" id="1_ujitf"]
-[ext_resource type="Texture2D" uid="uid://ihm1rstc624w" path="res://HachiwareModernDesign.webp" id="2_mh1de"]
+[ext_resource type="Texture2D" uid="uid://ddv1wksxiwegr" path="res://asetSprite/chaser.png" id="2_ujitf"]
 
 [node name="ChaserEnemy" type="Node2D" unique_id=1599525994]
 script = ExtResource("1_ujitf")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=2118102071]
-scale = Vector2(0.1, 0.1)
-texture = ExtResource("2_mh1de")
+scale = Vector2(0.05, 0.05)
+texture = ExtResource("2_ujitf")

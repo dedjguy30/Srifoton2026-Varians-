@@ -1,9 +1,78 @@
 [gd_scene format=3 uid="uid://cjvseacp3hjh4"]
 
 [ext_resource type="Script" uid="uid://dk200woulh5nf" path="res://beetle.gd" id="1_lw8d3"]
+[ext_resource type="Texture2D" uid="uid://nsstwgrbd2o" path="res://asetSprite/Karakter Beatle-Sheet.png" id="2_x56ib"]
 
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_186t8"]
-load_path = "res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"
+[sub_resource type="AtlasTexture" id="AtlasTexture_1fmw7"]
+atlas = ExtResource("2_x56ib")
+region = Rect2(0, 0, 48, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4wdbk"]
+atlas = ExtResource("2_x56ib")
+region = Rect2(48, 0, 48, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_182ad"]
+atlas = ExtResource("2_x56ib")
+region = Rect2(96, 0, 48, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1kxa2"]
+atlas = ExtResource("2_x56ib")
+region = Rect2(0, 64, 48, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0ue8j"]
+atlas = ExtResource("2_x56ib")
+region = Rect2(48, 64, 48, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lwats"]
+atlas = ExtResource("2_x56ib")
+region = Rect2(96, 64, 48, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d20bq"]
+atlas = ExtResource("2_x56ib")
+region = Rect2(0, 128, 48, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_67an7"]
+atlas = ExtResource("2_x56ib")
+region = Rect2(48, 128, 48, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kj4s6"]
+atlas = ExtResource("2_x56ib")
+region = Rect2(96, 128, 48, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_tfq3d"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1fmw7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4wdbk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_182ad")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1kxa2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0ue8j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lwats")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d20bq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_67an7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kj4s6")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_13qdw"]
 size = Vector2(16, 16)
@@ -13,12 +82,14 @@ position = Vector2(64, 64)
 scale = Vector2(2, 2)
 script = ExtResource("1_lw8d3")
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1512328642]
+[node name="Sprite2D" type="AnimatedSprite2D" parent="." unique_id=175085328]
+z_index = 1
 texture_filter = 1
-scale = Vector2(0.1, 0.1)
-texture = SubResource("CompressedTexture2D_186t8")
+scale = Vector2(0.5, 0.5)
+sprite_frames = SubResource("SpriteFrames_tfq3d")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=731454550]
+position = Vector2(0.5, 0.5)
 shape = SubResource("RectangleShape2D_13qdw")
 
 [node name="up" type="RayCast2D" parent="." unique_id=1694350696]

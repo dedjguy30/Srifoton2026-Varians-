@@ -1,7 +1,7 @@
-[gd_scene format=3 uid="uid://bvyk1g2qykytb"]
+[gd_scene format=3 uid="uid://pfiioya6orke"]
 
 [ext_resource type="Script" uid="uid://jcltj1vdkl2b" path="res://pressure_plate.gd" id="1_8bqyo"]
-[ext_resource type="Texture2D" uid="uid://3rym8vjf5fyy" path="res://icon.svg" id="2_djmga"]
+[ext_resource type="Texture2D" uid="uid://bmqmitqo5hs6g" path="res://asetSprite/Pressureplate.png" id="2_8bqyo"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ec6ob"]
 size = Vector2(48, 48)
@@ -10,8 +10,8 @@ size = Vector2(48, 48)
 script = ExtResource("1_8bqyo")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1780314096]
-scale = Vector2(0.2, 0.2)
-texture = ExtResource("2_djmga")
+scale = Vector2(0.05, 0.05)
+texture = ExtResource("2_8bqyo")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=680821503]
 shape = SubResource("RectangleShape2D_ec6ob")
