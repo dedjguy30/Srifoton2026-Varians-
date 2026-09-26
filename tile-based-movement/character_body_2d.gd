@@ -6,8 +6,6 @@ extends CharacterBody2D
 # LIFE STATE
 # ==================================================
 
-# Character mati tetap ada sebagai Node.
-# Jangan queue_free karena Undo membutuhkannya.
 var is_alive: bool = true
 
 
@@ -17,11 +15,12 @@ var is_alive: bool = true
 
 const MOVE_DURATION: float = 0.185
 
-@export var board: Board
+# Tinggi bounce ketika pindah tile.
+const BOUNCE_HEIGHT: float = 7.0
 
+@export var board: Board
 @export var push_strength: int = 1
 
-# Jangan export.
 # Level yang menentukan siapa Character aktif.
 var is_active: bool = false
 
@@ -30,9 +29,8 @@ var is_active: bool = false
 # NODE REFERENCES
 # ==================================================
 
-@onready var sprite: Sprite2D = $Sprite2D
+@onready var sprite: AnimatedSprite2D = $Sprite2D
 
-# Legacy RayCast.
 @onready var ray_up: RayCast2D = $up
 @onready var ray_down: RayCast2D = $down
 @onready var ray_left: RayCast2D = $left
@@ -45,8 +43,12 @@ var is_active: bool = false
 
 var grid_position: Vector2i = Vector2i.ZERO
 var move_tween: Tween
+var death_tween: Tween
 
-# Penanda biru di atas Character yang sedang aktif.
+var death_sprite_home_position: Vector2
+var death_sprite_home_scale: Vector2
+var death_sprite_home_rotation: float
+var death_sprite_home_modulate: Color
 var active_indicator: Polygon2D
 
 
@@ -55,34 +57,24 @@ var active_indicator: Polygon2D
 # ==================================================
 
 func _ready() -> void:
-	# Semua Character mulai inactive.
-	# Level nanti memilih tepat SATU Character.
 	is_active = false
 	set_physics_process(false)
 
-	# Semua Character otomatis punya indikator aktif.
+	# Animasi normal.
+	if sprite.sprite_frames != null:
+		if sprite.sprite_frames.has_animation("default"):
+			sprite.play("default")
+	death_sprite_home_position = sprite.position
+	
+	death_sprite_home_scale = sprite.scale
+	death_sprite_home_rotation = sprite.rotation
+	death_sprite_home_modulate = sprite.modulate
+
 	create_active_indicator()
 
 	add_to_group("characters")
 	add_to_group("pressure_plate_activator")
 	add_to_group("hazard_vulnerable")
-		# Semua Character selalu mulai inactive.
-	# Level nanti memilih SATU Character.
-	is_active = false
-	# Playable Character.
-	add_to_group(
-		"characters"
-	)
-
-	# Bisa menekan Pressure Plate.
-	add_to_group(
-		"pressure_plate_activator"
-	)
-
-	# Bisa mati karena Hazard seperti Spike.
-	add_to_group(
-		"hazard_vulnerable"
-	)
 
 	if board == null:
 		push_error(
@@ -108,14 +100,6 @@ func _ready() -> void:
 		)
 		return
 
-	print(
-		"Character ready: ",
-		name,
-		" | Cell: ",
-		grid_position
-	)
-	
-	
 
 
 # ==================================================
@@ -127,14 +111,12 @@ func create_active_indicator() -> void:
 
 	active_indicator.name = "ActiveIndicator"
 
-	# Segitiga lebih kecil.
 	active_indicator.polygon = PackedVector2Array([
 		Vector2(-5, -4),
 		Vector2(5, -4),
 		Vector2(0, 3)
 	])
 
-	# Biru terang.
 	active_indicator.color = Color(
 		0.15,
 		0.55,
@@ -142,7 +124,6 @@ func create_active_indicator() -> void:
 		1.0
 	)
 
-	# Lebih turun / lebih dekat ke kepala.
 	active_indicator.position = Vector2(
 		0,
 		-25
@@ -161,11 +142,9 @@ func create_active_indicator() -> void:
 func _physics_process(
 	_delta: float
 ) -> void:
-	# Character mati tidak menerima input.
 	if not is_alive:
 		return
 
-	# Character nonaktif tidak menerima input.
 	if not is_active:
 		return
 
@@ -174,18 +153,6 @@ func _physics_process(
 
 	if is_moving():
 		return
-
-
-	# ==================================================
-	# PENTING
-	# ==================================================
-	#
-	# UNDO SUDAH TIDAK ADA DI SINI.
-	#
-	# Z sekarang ditangani level.gd secara global.
-	#
-	# Jadi kalau Character ini mati,
-	# Z tetap bisa digunakan.
 
 
 	# ==================================================
@@ -228,19 +195,61 @@ func try_use_skill() -> void:
 
 	board.begin_turn()
 
-	var skill_success: bool = (
-		use_skill()
-	)
+	var skill_success: bool = use_skill()
 
 	if skill_success:
 		board.commit_turn()
+
+		play_skill_animation()
+
 	else:
 		board.cancel_turn()
 
 
-# Default Character tidak punya active skill.
+func play_skill_animation() -> void:
+	if sprite == null:
+		return
+
+	if sprite.sprite_frames == null:
+		return
+
+	if not sprite.sprite_frames.has_animation(
+		"skill"
+	):
+		return
+
+	sprite.play("skill")
+
+	await sprite.animation_finished
+
+	if not is_instance_valid(sprite):
+		return
+
+	if sprite.sprite_frames.has_animation(
+		"default"
+	):
+		sprite.play("default")
+
+
 func use_skill() -> bool:
 	return false
+
+
+# ==================================================
+# FACING
+# ==================================================
+
+func update_facing(
+	direction: Vector2i
+) -> void:
+	if sprite == null:
+		return
+
+	if direction.x < 0:
+		sprite.flip_h = true
+
+	elif direction.x > 0:
+		sprite.flip_h = false
 
 
 # ==================================================
@@ -261,11 +270,19 @@ func get_input_direction() -> Vector2i:
 	if Input.is_action_pressed(
 		"ui_left"
 	):
+		update_facing(
+			Vector2i.LEFT
+		)
+
 		return Vector2i.LEFT
 
 	if Input.is_action_pressed(
 		"ui_right"
 	):
+		update_facing(
+			Vector2i.RIGHT
+		)
+
 		return Vector2i.RIGHT
 
 	return Vector2i.ZERO
@@ -306,12 +323,19 @@ func move_one_tile(
 	if not is_alive:
 		return
 
+	if direction == Vector2i.ZERO:
+		return
+
+	update_facing(
+		direction
+	)
+
 	var target_cell: Vector2i = (
 		grid_position
 		+ direction
 	)
+	var pushed_this_move: bool = false
 
-	# Mulai satu turn.
 	board.begin_turn()
 
 
@@ -350,6 +374,8 @@ func move_one_tile(
 				board.cancel_turn()
 				return
 
+			pushed_this_move = true
+
 
 		# ==================================================
 		# PLAYER WALKS INTO ENEMY
@@ -361,11 +387,9 @@ func move_one_tile(
 				as GridEnemy
 			)
 
-			# Enemy mati tidak bisa makan Player.
 			if not enemy.is_alive:
 				board.cancel_turn()
 				return
-
 
 			print(
 				"CHARACTER WALKED INTO ENEMY | ",
@@ -374,11 +398,6 @@ func move_one_tile(
 				enemy.name
 			)
 
-
-			# Enemy memakan Character.
-			#
-			# Character tetap berada di cell asal,
-			# lalu mati dari sana.
 			var eaten: bool = (
 				enemy.eat_character_from_player_move(
 					self
@@ -389,15 +408,6 @@ func move_one_tile(
 				board.cancel_turn()
 				return
 
-
-			# ==================================================
-			# VALID TURN
-			# ==================================================
-
-			# Walaupun Character tidak benar-benar
-			# bergerak ke cell Enemy,
-			# keputusan maju ke Enemy tetap dianggap
-			# sebagai satu turn yang valid.
 			board.commit_turn()
 
 			return
@@ -413,12 +423,17 @@ func move_one_tile(
 
 
 	# ==================================================
-	# NORMAL CHARACTER MOVEMENT
+	# VISUAL POSITION BEFORE MOVE
 	# ==================================================
 
-	var old_world_position: Vector2 = (
-		global_position
+	var old_visual_position: Vector2 = (
+		sprite.global_position
 	)
+
+
+	# ==================================================
+	# LOGICAL MOVE
+	# ==================================================
 
 	var success: bool = (
 		board.move_object(
@@ -438,6 +453,12 @@ func move_one_tile(
 		grid_position
 	)
 
+	# Posisi visual sebenarnya setelah root
+	# berpindah. Ini menjaga offset sprite.
+	var target_visual_position: Vector2 = (
+		sprite.global_position
+	)
+
 	board.commit_turn()
 
 
@@ -445,18 +466,21 @@ func move_one_tile(
 	# DIED DURING MOVEMENT
 	# ==================================================
 
-	# Contoh:
-	# Character masuk Spike.
 	if not is_alive:
 		return
+	
+	if pushed_this_move:
+		AudioManager.play_push_then_move()
+	else:
+		AudioManager.play_move()
 
 
 	# ==================================================
-	# VISUAL TWEEN
+	# BOUNCE VISUAL
 	# ==================================================
 
 	sprite.global_position = (
-		old_world_position
+		old_visual_position
 	)
 
 	if move_tween:
@@ -468,13 +492,47 @@ func move_one_tile(
 		Tween.TWEEN_PROCESS_PHYSICS
 	)
 
+	# Titik tengah perjalanan.
+	var middle_position: Vector2 = (
+		old_visual_position.lerp(
+			target_visual_position,
+			0.5
+		)
+	)
+
+	# Naik sedikit = bounce.
+	middle_position.y -= BOUNCE_HEIGHT
+
+
+	# ==================================================
+	# BOUNCE UP
+	# ==================================================
+
 	move_tween.tween_property(
 		sprite,
 		"global_position",
-		global_position,
-		MOVE_DURATION
+		middle_position,
+		MOVE_DURATION * 0.5
 	).set_trans(
 		Tween.TRANS_SINE
+	).set_ease(
+		Tween.EASE_OUT
+	)
+
+
+	# ==================================================
+	# BOUNCE LAND
+	# ==================================================
+
+	move_tween.tween_property(
+		sprite,
+		"global_position",
+		target_visual_position,
+		MOVE_DURATION * 0.5
+	).set_trans(
+		Tween.TRANS_SINE
+	).set_ease(
+		Tween.EASE_IN
 	)
 
 
@@ -518,9 +576,12 @@ func move_to_cell_in_current_turn(
 		grid_position
 	)
 
+	var target_visual_position: Vector2 = (
+		sprite.global_position
+	)
 
-	# Hazard saat external movement
-	# bisa membunuh Character.
+
+	# Hazard bisa membunuh Character.
 	if not is_alive:
 		return true
 
@@ -538,10 +599,12 @@ func move_to_cell_in_current_turn(
 		Tween.TWEEN_PROCESS_PHYSICS
 	)
 
+	# External movement tidak pakai bounce.
+	# Contoh: dilempar Grasshopper.
 	move_tween.tween_property(
 		sprite,
 		"global_position",
-		global_position,
+		target_visual_position,
 		duration
 	).set_trans(
 		Tween.TRANS_SINE
@@ -594,15 +657,10 @@ func set_active(
 		and is_alive
 	)
 
-	# PENTING:
-	# Character inactive sama sekali tidak menjalankan
-	# _physics_process(), jadi tidak bisa ikut membaca
-	# tombol movement milik Character aktif.
 	set_physics_process(
 		is_active
 	)
 
-	# Indikator hanya terlihat pada Character aktif.
 	if active_indicator != null:
 		active_indicator.visible = (
 			is_active
@@ -625,7 +683,200 @@ func set_active(
 func can_cross_pit() -> bool:
 	return false
 
+# ==================================================
+# DEATH VISUAL - KNOCKBACK FALL
+# ==================================================
 
+# ==================================================
+# DEATH VISUAL - KNOCKBACK FALL
+# ==================================================
+
+func play_death_animation() -> void:
+	if is_alive:
+		return
+
+	if sprite == null:
+		visible = false
+		return
+
+	if death_tween:
+		death_tween.kill()
+
+	if move_tween:
+		move_tween.kill()
+
+
+	# ==================================================
+	# RESET VISUAL
+	# ==================================================
+
+	sprite.position = death_sprite_home_position
+	sprite.scale = death_sprite_home_scale
+	sprite.rotation = death_sprite_home_rotation
+	sprite.modulate = death_sprite_home_modulate
+
+
+	# ==================================================
+	# KNOCKBACK DIRECTION
+	# ==================================================
+
+	var knockback_sign: float = -1.0
+
+	# Menghadap kiri -> mental ke kanan.
+	if sprite.flip_h:
+		knockback_sign = 1.0
+
+
+	var knockback_position: Vector2 = (
+		death_sprite_home_position
+		+ Vector2(
+			8.0 * knockback_sign,
+			-6.0
+		)
+	)
+
+
+	var fall_position: Vector2 = (
+		death_sprite_home_position
+		+ Vector2(
+			14.0 * knockback_sign,
+			8.0
+		)
+	)
+
+
+	var fall_rotation: float = (
+		death_sprite_home_rotation
+		+ 0.75 * knockback_sign
+	)
+
+
+	# ==================================================
+	# CREATE TWEEN
+	# ==================================================
+
+	death_tween = create_tween()
+
+	death_tween.set_process_mode(
+		Tween.TWEEN_PROCESS_PHYSICS
+	)
+
+
+	# ==================================================
+	# PHASE 1 - KNOCKBACK
+	# ==================================================
+
+	death_tween.tween_property(
+		sprite,
+		"position",
+		knockback_position,
+		0.09
+	).set_trans(
+		Tween.TRANS_QUAD
+	).set_ease(
+		Tween.EASE_OUT
+	)
+
+
+	death_tween.parallel().tween_property(
+		sprite,
+		"scale",
+		Vector2(
+			death_sprite_home_scale.x * 1.08,
+			death_sprite_home_scale.y * 0.92
+		),
+		0.09
+	)
+
+
+	# ==================================================
+	# PHASE 2 - FALL
+	# ==================================================
+
+	death_tween.tween_property(
+		sprite,
+		"position",
+		fall_position,
+		0.22
+	).set_trans(
+		Tween.TRANS_QUAD
+	).set_ease(
+		Tween.EASE_IN
+	)
+
+
+	death_tween.parallel().tween_property(
+		sprite,
+		"rotation",
+		fall_rotation,
+		0.22
+	)
+
+
+	death_tween.parallel().tween_property(
+		sprite,
+		"scale",
+		Vector2(
+			death_sprite_home_scale.x * 0.90,
+			death_sprite_home_scale.y * 0.72
+		),
+		0.22
+	)
+
+
+	death_tween.parallel().tween_property(
+		sprite,
+		"modulate:a",
+		0.0,
+		0.22
+	)
+
+
+	death_tween.finished.connect(
+		_finish_character_death_animation
+	)
+
+
+# ==================================================
+# FINISH DEATH
+# ==================================================
+
+func _finish_character_death_animation() -> void:
+	if is_alive:
+		return
+
+	visible = false
+
+
+# ==================================================
+# RESET DEATH VISUAL FOR UNDO
+# ==================================================
+
+func reset_character_death_visual() -> void:
+	if death_tween:
+		death_tween.kill()
+
+	death_tween = null
+
+	if sprite == null:
+		return
+
+
+	sprite.position = death_sprite_home_position
+	sprite.scale = death_sprite_home_scale
+	sprite.rotation = death_sprite_home_rotation
+	sprite.modulate = death_sprite_home_modulate
+
+
+	if (
+		sprite.sprite_frames != null
+		and sprite.sprite_frames.has_animation(
+			"default"
+		)
+	):
+		sprite.play(
+			"default"
+		)
 # ==================================================
 # CHARACTER DEATH
 # ==================================================
@@ -721,15 +972,20 @@ func defeat() -> bool:
 
 	is_alive = false
 
-# Matikan input + physics process Character mati.
-	set_active(false)
+	AudioManager.play_death()
 
-	# Sementara hidden.
-	# Nanti bisa diganti death animation.
-	visible = false
+	set_active(false)
 
 	collision_layer = 0
 	collision_mask = 0
+
+	# Tetap terlihat supaya Knockback Fall bisa dimainkan.
+	visible = true
+
+	call_deferred(
+		"play_death_animation"
+	)
+
 
 	print(
 		"CHARACTER DEFEATED | ",
@@ -752,39 +1008,88 @@ func _undo_defeat(
 		data["death_cell"]
 	)
 
-
-	# ==================================================
-	# VALIDATE CELL
-	# ==================================================
-
-	if board.is_occupied(
+	print(
+		"DEBUG UNDO DEATH START | ",
+		name,
+		" | Cell: ",
 		death_cell
+	)
+
+
+	# ==================================================
+	# BOARD CHECK
+	# ==================================================
+
+	if board == null:
+		push_error(
+			"UNDO DEATH ERROR | Board null | "
+			+ name
+		)
+		return
+
+
+	# ==================================================
+	# CHECK OCCUPANCY
+	# ==================================================
+
+	var occupant = board.get_object_at(
+		death_cell
+	)
+
+	# Cell boleh kosong.
+	# Kalau ternyata self sendiri sudah ter-register,
+	# juga jangan dianggap gagal.
+	if (
+		occupant != null
+		and occupant != self
 	):
 		push_warning(
-			"Undo Character Death gagal: "
-			+ "cell masih occupied."
+			"UNDO DEATH GAGAL | Cell occupied oleh: "
+			+ str(occupant.name)
+			+ " | Cell: "
+			+ str(death_cell)
 		)
 
 		return
 
 
 	# ==================================================
-	# REVIVE
+	# REVIVE LOGICAL STATE
 	# ==================================================
 
 	is_alive = true
 
-	visible = data[
-		"previous_visible"
-	]
 
-	collision_layer = data[
-		"previous_collision_layer"
-	]
+	# ==================================================
+	# RESET DEATH ANIMATION
+	# ==================================================
 
-	collision_mask = data[
-		"previous_collision_mask"
-	]
+	reset_character_death_visual()
+
+
+	# ==================================================
+	# RESTORE VISUAL / COLLISION
+	# ==================================================
+
+	visible = data.get(
+		"previous_visible",
+		true
+	)
+
+	collision_layer = data.get(
+		"previous_collision_layer",
+		1
+	)
+
+	collision_mask = data.get(
+		"previous_collision_mask",
+		1
+	)
+
+
+	# ==================================================
+	# RESTORE POSITION
+	# ==================================================
 
 	grid_position = death_cell
 
@@ -792,8 +1097,11 @@ func _undo_defeat(
 		death_cell
 	)
 
-	sprite.global_position = (
-		global_position
+	# Sprite sudah di-reset oleh
+	# reset_character_death_visual().
+	# Pastikan root + sprite kembali sinkron.
+	sprite.position = (
+		death_sprite_home_position
 	)
 
 
@@ -801,24 +1109,82 @@ func _undo_defeat(
 	# REGISTER AGAIN
 	# ==================================================
 
-	if not board.register_object(
-		death_cell,
-		self
-	):
-		is_alive = false
-		return
+	# Kalau belum terdaftar, register ulang.
+	if occupant != self:
+		var register_success: bool = (
+			board.register_object(
+				death_cell,
+				self
+			)
+		)
+
+		if not register_success:
+			push_error(
+				"UNDO DEATH ERROR | "
+				+ "Gagal register Character | "
+				+ name
+			)
+
+			is_alive = false
+			visible = false
+
+			return
 
 
-	# Kalau Character ini aktif sebelum mati,
-	# kembalikan status tersebut.
-	#
-	# Level kemudian akan memastikan hanya
-	# satu Character hidup yang aktif.
-	set_active(
-	data["previous_active"]
-)
+	# ==================================================
+	# RESTORE ACTIVE STATE
+	# ==================================================
+
+	var was_active: bool = (
+		data.get(
+			"previous_active",
+			false
+		)
+	)
+
+
+	if was_active:
+		# Pastikan tidak ada dua Character aktif.
+		for node in get_tree().get_nodes_in_group(
+			"characters"
+		):
+			if not node is GridCharacter:
+				continue
+
+			var character := (
+				node as GridCharacter
+			)
+
+			if not is_instance_valid(
+				character
+			):
+				continue
+
+			if character == self:
+				continue
+
+			character.set_active(
+				false
+			)
+
+
+		set_active(
+			true
+		)
+
+	else:
+		set_active(
+			false
+		)
+
 
 	print(
-		"UNDO CHARACTER DEATH | ",
-		name
+		"DEBUG UNDO DEATH SUCCESS | ",
+		name,
+		" | Alive: ",
+		is_alive,
+		" | Visible: ",
+		visible,
+		" | Cell: ",
+		grid_position
 	)

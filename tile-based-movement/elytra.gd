@@ -6,8 +6,14 @@ extends GridCharacter
 # SETTINGS
 # ==================================================
 
-# Waktu untuk meluncur satu tile.
+# Waktu meluncur satu tile.
 const SLIDE_STEP_DURATION: float = 0.07
+
+# Berapa lama bayangan Elytra bertahan.
+const AFTERIMAGE_LIFETIME: float = 0.14
+
+# Transparansi awal bayangan.
+const AFTERIMAGE_ALPHA: float = 0.38
 
 
 # ==================================================
@@ -18,8 +24,6 @@ var is_sliding: bool = false
 
 var slide_direction: Vector2i = Vector2i.ZERO
 
-# Apakah selama slide ini Elytra sudah
-# benar-benar berpindah minimal satu cell.
 var slide_moved: bool = false
 
 
@@ -27,8 +31,6 @@ var slide_moved: bool = false
 # INPUT
 # ==================================================
 
-# Elytra memakai input sendiri supaya selama
-# sedang meluncur tidak bisa dibelokkan.
 func _physics_process(
 	_delta: float
 ) -> void:
@@ -42,23 +44,10 @@ func _physics_process(
 		return
 
 
-	# ==================================================
-	# CURRENTLY SLIDING
-	# ==================================================
-
-	# Selama Elytra masih meluncur:
-	#
-	# ↓ → ↑ ← semuanya diabaikan.
-	#
-	# Dia WAJIB terus ke arah awal sampai
-	# bertemu sesuatu.
+	# Sedang sliding = tidak boleh dibelokkan.
 	if is_sliding:
 		return
 
-
-	# ==================================================
-	# START NEW SLIDE
-	# ==================================================
 
 	var direction: Vector2i = (
 		get_just_pressed_direction()
@@ -72,9 +61,10 @@ func _physics_process(
 	)
 
 
-# Hanya membaca input yang BARU ditekan.
-#
-# Bukan tombol yang sedang ditahan.
+# ==================================================
+# JUST PRESSED DIRECTION
+# ==================================================
+
 func get_just_pressed_direction() -> Vector2i:
 	if Input.is_action_just_pressed(
 		"ui_up"
@@ -103,10 +93,6 @@ func get_just_pressed_direction() -> Vector2i:
 # START SLIDE
 # ==================================================
 
-# Override movement GridCharacter.
-#
-# Fungsi ini cuma MEMULAI slide.
-# Movement selanjutnya diteruskan otomatis.
 func move_one_tile(
 	direction: Vector2i
 ) -> void:
@@ -122,14 +108,23 @@ func move_one_tile(
 	if direction == Vector2i.ZERO:
 		return
 
+
+	# Ikut hadap kiri / kanan.
+	update_facing(
+		direction
+	)
+
+
 	slide_direction = direction
 
 	slide_moved = false
 
 	is_sliding = true
 
-	# Seluruh perjalanan Elytra adalah SATU TURN.
+
+	# Seluruh slide dianggap SATU turn.
 	board.begin_turn()
+
 
 	print(
 		"ELYTRA START SLIDE | ",
@@ -137,6 +132,7 @@ func move_one_tile(
 		" | Direction: ",
 		slide_direction
 	)
+
 
 	_continue_slide()
 
@@ -183,9 +179,6 @@ func _continue_slide() -> void:
 	# BEETLE
 	# ==================================================
 
-	# Beetle tidak mati dan tidak terdorong.
-	#
-	# Elytra berhenti SATU TILE sebelumnya.
 	if target_object is BeetleCharacter:
 		print(
 			"ELYTRA HIT BEETLE | ",
@@ -202,8 +195,6 @@ func _continue_slide() -> void:
 	# ELYTRA VS ELYTRA
 	# ==================================================
 
-	# Belum menentukan mechanic final.
-	# Untuk sekarang menjadi blocker.
 	if target_object is ElytraCharacter:
 		print(
 			"ELYTRA HIT ELYTRA | Stop."
@@ -236,7 +227,6 @@ func _continue_slide() -> void:
 		)
 
 
-		# Character selain Beetle mati.
 		var defeated: bool = (
 			character.defeat()
 		)
@@ -246,8 +236,7 @@ func _continue_slide() -> void:
 			return
 
 
-		# Character sudah unregister dari Board.
-		# Elytra masuk ke cell bekas Character.
+		# Masuk ke cell Character lalu berhenti.
 		_slide_one_step(
 			true
 		)
@@ -278,7 +267,6 @@ func _continue_slide() -> void:
 		)
 
 
-		# Enemy mati.
 		var defeated_enemy: bool = (
 			enemy.defeat()
 		)
@@ -288,8 +276,7 @@ func _continue_slide() -> void:
 			return
 
 
-		# Masuk ke cell bekas Enemy.
-		# Setelah itu STOP.
+		# Masuk ke cell Enemy lalu berhenti.
 		_slide_one_step(
 			true
 		)
@@ -298,7 +285,7 @@ func _continue_slide() -> void:
 
 
 	# ==================================================
-	# WALL / BOX / CLOSED DOOR / BLOCKER
+	# BLOCKER
 	# ==================================================
 
 	print(
@@ -310,19 +297,9 @@ func _continue_slide() -> void:
 
 
 # ==================================================
-# MOVE ONE TILE
+# SLIDE ONE TILE
 # ==================================================
 
-# stop_after_step:
-#
-# false:
-# setelah tween selesai, terus meluncur.
-#
-# true:
-# setelah tween selesai, slide selesai.
-#
-# Dipakai ketika Elytra menghantam
-# Character atau Enemy.
 func _slide_one_step(
 	stop_after_step: bool = false
 ) -> void:
@@ -341,7 +318,6 @@ func _slide_one_step(
 	)
 
 
-	# Cell harus sudah kosong.
 	if board.is_occupied(
 		target_cell
 	):
@@ -379,6 +355,13 @@ func _slide_one_step(
 		grid_position
 	)
 
+	# Simpan posisi sprite setelah root berpindah.
+	# Ini menjaga offset visual.
+	var target_visual_position: Vector2 = (
+		sprite.global_position
+	)
+
+
 	slide_moved = true
 
 
@@ -386,10 +369,6 @@ func _slide_one_step(
 	# HAZARD MAY HAVE KILLED ELYTRA
 	# ==================================================
 
-	# board.move_object() emit object_moved.
-	#
-	# Jadi Spike / Pit bisa membunuh Elytra
-	# SEBELUM kita sampai sini.
 	if not is_alive:
 		_finish_slide()
 		return
@@ -403,13 +382,14 @@ func _slide_one_step(
 		move_tween.kill()
 
 
-	# Root sudah pindah ke cell baru.
-	#
-	# Sprite dikembalikan ke posisi visual lama
-	# lalu bergerak satu tile.
+	# Kembalikan sprite ke posisi visual sebelumnya.
 	sprite.global_position = (
 		old_visual_position
 	)
+
+
+	# Buat bayangan dari posisi lama.
+	_create_slide_afterimage()
 
 
 	move_tween = create_tween()
@@ -421,7 +401,7 @@ func _slide_one_step(
 	move_tween.tween_property(
 		sprite,
 		"global_position",
-		global_position,
+		target_visual_position,
 		SLIDE_STEP_DURATION
 	).set_trans(
 		Tween.TRANS_LINEAR
@@ -444,6 +424,127 @@ func _slide_one_step(
 
 
 # ==================================================
+# AFTERIMAGE / MOTION BLUR
+# ==================================================
+
+func _create_slide_afterimage() -> void:
+	if sprite == null:
+		return
+
+	if sprite.sprite_frames == null:
+		return
+
+	if not sprite.sprite_frames.has_animation(
+		sprite.animation
+	):
+		return
+
+
+	# Ambil texture frame yang sedang tampil.
+	var frame_texture: Texture2D = (
+		sprite.sprite_frames.get_frame_texture(
+			sprite.animation,
+			sprite.frame
+		)
+	)
+
+	if frame_texture == null:
+		return
+
+
+	# Simpan transform posisi asli sebelum
+	# ghost dimasukkan ke node lain.
+	var old_transform: Transform2D = (
+		sprite.global_transform
+	)
+
+
+	var ghost := Sprite2D.new()
+
+	ghost.texture = frame_texture
+
+	ghost.centered = sprite.centered
+	ghost.offset = sprite.offset
+
+	ghost.flip_h = sprite.flip_h
+	ghost.flip_v = sprite.flip_v
+
+	ghost.texture_filter = (
+		sprite.texture_filter
+	)
+
+	# Transparan supaya terasa seperti blur.
+	ghost.modulate = Color(
+		1.0,
+		1.0,
+		1.0,
+		AFTERIMAGE_ALPHA
+	)
+
+
+	# Taruh sebagai sibling Elytra,
+	# bukan child Elytra.
+	#
+	# Jadi ghost tidak ikut bergerak
+	# saat root Elytra pindah cell.
+	var ghost_parent: Node = get_parent()
+
+	if ghost_parent == null:
+		ghost_parent = (
+			get_tree().current_scene
+		)
+
+	if ghost_parent == null:
+		ghost.queue_free()
+		return
+
+
+	ghost_parent.add_child(
+		ghost
+	)
+
+	ghost.global_transform = (
+		old_transform
+	)
+
+	# Z sama dengan Elytra supaya tidak
+	# tenggelam di bawah ground.
+	ghost.z_index = z_index
+
+
+	# ==================================================
+	# FADE OUT
+	# ==================================================
+
+	var fade_tween: Tween = (
+		ghost.create_tween()
+	)
+
+	fade_tween.set_process_mode(
+		Tween.TWEEN_PROCESS_PHYSICS
+	)
+
+	fade_tween.tween_property(
+		ghost,
+		"modulate",
+		Color(
+			1.0,
+			1.0,
+			1.0,
+			0.0
+		),
+		AFTERIMAGE_LIFETIME
+	)
+
+	fade_tween.tween_callback(
+		Callable(
+			ghost,
+			"queue_free"
+		)
+	)
+
+
+# ==================================================
 # FINISH SLIDE
 # ==================================================
 
@@ -462,14 +563,9 @@ func _finish_slide() -> void:
 	# ==================================================
 
 	if slide_moved:
-		# Semua tile yang dilewati,
-		# kill dan hazard adalah SATU turn.
 		board.commit_turn()
 
 	else:
-		# Kalau blocker tepat di depan
-		# dan Elytra tidak bergerak sama sekali,
-		# jangan buat turn palsu.
 		board.cancel_turn()
 
 
@@ -488,9 +584,6 @@ func _finish_slide() -> void:
 # MOVEMENT STATE
 # ==================================================
 
-# Override supaya Level juga tahu Elytra
-# masih bergerak walaupun sedang berada
-# di sela-sela tween tile.
 func is_moving() -> bool:
 	if is_sliding:
 		return true

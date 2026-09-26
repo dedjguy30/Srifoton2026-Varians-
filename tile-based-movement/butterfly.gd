@@ -7,11 +7,11 @@ const MAX_NECTAR: int = 3
 
 
 # Memberi tahu sistem lain saat jumlah Nectar berubah.
-# Nanti dipakai UI pada Batch C.
 signal nectar_changed(
 	current: int,
 	maximum: int
 )
+
 
 # ==================================================
 # FLYING
@@ -20,6 +20,7 @@ signal nectar_changed(
 # Apakah Butterfly sedang terbang.
 # Right Click akan toggle ON / OFF.
 var is_flying: bool = false
+
 # Nectar yang sedang dibawa Butterfly.
 var nectar_count: int = 0
 
@@ -77,6 +78,7 @@ func remove_nectar() -> bool:
 
 	return true
 
+
 # ==================================================
 # ACTIVE SKILL — FLYING
 # ==================================================
@@ -94,43 +96,78 @@ func use_skill() -> bool:
 		print(
 			"BUTTERFLY | Tidak bisa berhenti terbang di atas Pit."
 		)
+
 		return false
 
-	var previous_state := is_flying
+
+	var previous_state: bool = is_flying
 
 	is_flying = not is_flying
+
 
 	print(
 		"BUTTERFLY FLYING: ",
 		is_flying
 	)
 
+
 	# Simpan perubahan Flying ke turn yang sedang aktif.
 	# Jadi Z bisa membatalkan toggle Flying.
 	board.append_action_to_current_turn({
 		"type": "custom",
+
 		"undo_callable": Callable(
 			self,
 			"_undo_flying_toggle"
 		),
+
 		"data": {
 			"previous_state": previous_state
 		}
 	})
 
+	AudioManager.play_nectar()
 	return true
 
 
 # ==================================================
-# PIT CAPABILITY
+# SKILL ANIMATION
 # ==================================================
 
-# Override fungsi milik GridCharacter.
+# Animasi "skill" hanya dimainkan ketika
+# Butterfly BARU MULAI terbang.
 #
-# Butterfly hanya aman melewati Pit
-# ketika Flying sedang aktif.
-func can_cross_pit() -> bool:
-	return is_flying
+# Saat Flying dimatikan, animasi skill tidak dimainkan.
+func play_skill_animation() -> void:
+	if sprite == null:
+		return
+
+	if sprite.sprite_frames == null:
+		return
+
+	# Flying dimatikan:
+	# langsung balik ke animasi normal.
+	if not is_flying:
+		if sprite.sprite_frames.has_animation("default"):
+			sprite.play("default")
+		return
+
+	# Flying baru dinyalakan:
+	# mainkan animasi skill.
+	if not sprite.sprite_frames.has_animation("skill"):
+		return
+
+	sprite.play("skill")
+
+	await sprite.animation_finished
+
+	if not is_instance_valid(sprite):
+		return
+
+	# Setelah animasi skill selesai,
+	# balik ke default.
+	if sprite.sprite_frames.has_animation("default"):
+		sprite.play("default")
 
 
 # ==================================================
@@ -146,10 +183,13 @@ func is_over_pit() -> bool:
 		if not node is PitHazard:
 			continue
 
+
 		var pit := node as PitHazard
+
 
 		if pit.grid_position == grid_position:
 			return true
+
 
 	return false
 
@@ -167,7 +207,11 @@ func _undo_flying_toggle(
 		"previous_state"
 	]
 
+
 	print(
 		"UNDO BUTTERFLY FLYING: ",
 		is_flying
 	)
+
+func can_cross_pit() -> bool:
+	return is_flying

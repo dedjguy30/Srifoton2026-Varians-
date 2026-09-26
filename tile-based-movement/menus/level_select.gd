@@ -43,6 +43,7 @@ var guide_index: int = 0
 # ==================================================
 
 func _ready() -> void:
+	AudioManager.play_menu_bgm()
 	_create_free_play_button()
 	_create_guide_button()
 

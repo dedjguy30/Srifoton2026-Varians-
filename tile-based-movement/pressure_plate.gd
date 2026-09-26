@@ -87,6 +87,7 @@ func sync_with_board() -> void:
 
 	if is_pressed:
 		print("PRESSURE PLATE ON: ", occupant.name)
+		AudioManager.play_click()
 		activated.emit()
 	else:
 		print("PRESSURE PLATE OFF")

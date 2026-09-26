@@ -6,8 +6,6 @@ extends GridEnemy
 # WALKER MOVEMENT OPTIONS
 # ==================================================
 
-# Semua arah yang bisa dimasukkan
-# ke Movement Pattern lewat Inspector.
 enum MoveDirection {
 	ATAS,
 	BAWAH,
@@ -21,20 +19,6 @@ enum MoveDirection {
 # WALKER SETTINGS
 # ==================================================
 
-# Pattern gerakan Walker.
-#
-# Bisa diedit lewat Inspector.
-#
-# Default:
-# KIRI
-# KIRI
-# KANAN
-# ATAS
-# ATAS
-# BAWAH
-#
-# Setelah langkah terakhir,
-# kembali ke langkah pertama.
 @export var movement_pattern: Array[MoveDirection] = [
 	MoveDirection.KIRI,
 	MoveDirection.KIRI,
@@ -49,8 +33,6 @@ enum MoveDirection {
 # RUNTIME DATA
 # ==================================================
 
-# Index gerakan yang akan dipakai
-# pada turn berikutnya.
 var pattern_index: int = 0
 
 
@@ -62,17 +44,15 @@ func take_turn() -> void:
 	if board == null:
 		return
 
-	# Tidak ada pattern = Walker diam.
 	if movement_pattern.is_empty():
 		return
 
-	# Safety.
 	if pattern_index >= movement_pattern.size():
 		pattern_index = 0
 
-	# Simpan index sebelum berubah.
-	# Ini diperlukan untuk Undo.
-	var previous_index: int = pattern_index
+	var previous_index: int = (
+		pattern_index
+	)
 
 	var movement: MoveDirection = (
 		movement_pattern[
@@ -80,29 +60,26 @@ func take_turn() -> void:
 		]
 	)
 
-	# Pattern maju SATU langkah setiap turn.
-	#
-	# Bahkan kalau Walker terhalang,
-	# pattern tetap maju.
 	pattern_index += 1
 
 	if pattern_index >= movement_pattern.size():
 		pattern_index = 0
 
-	# Simpan perubahan index ke turn yang sama.
-	#
-	# Jadi Undo juga mengembalikan
-	# posisi dalam pattern.
+
 	board.append_action_to_current_turn({
 		"type": "custom",
+
 		"undo_callable": Callable(
 			self,
 			"_undo_pattern_step"
 		),
+
 		"data": {
-			"previous_index": previous_index
+			"previous_index":
+				previous_index
 		}
 	})
+
 
 	var direction: Vector2i = (
 		get_direction_vector(
@@ -110,21 +87,49 @@ func take_turn() -> void:
 		)
 	)
 
-	# DIAM tetap menghabiskan
-	# satu langkah dalam pattern.
+
+	# ==================================================
+	# DIAM
+	# ==================================================
+
 	if direction == Vector2i.ZERO:
 		print(
 			"WALKER DIAM | ",
 			name
 		)
+
 		return
 
-	# Coba bergerak.
-	var moved: bool = move_enemy(
-		direction
+
+	# ==================================================
+	# SAVE OLD VISUAL POSITION
+	# ==================================================
+
+	var old_visual_position: Vector2 = (
+		sprite.global_position
 	)
 
+
+	# ==================================================
+	# LOGICAL MOVE
+	# ==================================================
+
+	var moved: bool = (
+		move_enemy(
+			direction
+		)
+	)
+
+
+	# ==================================================
+	# VISUAL BOUNCE
+	# ==================================================
+
 	if moved:
+		play_bounce_from(
+			old_visual_position
+		)
+
 		print(
 			"WALKER MOVE | ",
 			name,
@@ -135,9 +140,6 @@ func take_turn() -> void:
 		)
 
 	else:
-		# Kalau blocked:
-		# tidak bergerak,
-		# tetapi pattern sudah maju.
 		print(
 			"WALKER BLOCKED | ",
 			name,
@@ -152,8 +154,6 @@ func take_turn() -> void:
 # DIRECTION CONVERSION
 # ==================================================
 
-# Mengubah pilihan enum menjadi
-# arah grid Vector2i.
 func get_direction_vector(
 	movement: MoveDirection
 ) -> Vector2i:
@@ -176,7 +176,6 @@ func get_direction_vector(
 	return Vector2i.ZERO
 
 
-# Nama arah untuk debug Output.
 func get_direction_name(
 	movement: MoveDirection
 ) -> String:
@@ -203,8 +202,6 @@ func get_direction_name(
 # UNDO PATTERN
 # ==================================================
 
-# Mengembalikan index pattern
-# sebelum turn tadi terjadi.
 func _undo_pattern_step(
 	data: Dictionary
 ) -> void:

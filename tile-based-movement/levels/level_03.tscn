@@ -10,11 +10,11 @@
 [ext_resource type="Script" uid="uid://bmttx0nsahku2" path="res://caterpilar.gd" id="8_vxifu"]
 [ext_resource type="PackedScene" uid="uid://cjvseacp3hjh4" path="res://beetle.tscn" id="9_31vjw"]
 [ext_resource type="PackedScene" uid="uid://dr31tk0jg38rh" path="res://Elytra.tscn" id="10_l32du"]
-[ext_resource type="PackedScene" path="res://walker_enemy.tscn" id="11_lwtrp"]
-[ext_resource type="PackedScene" path="res://pressure_plate.tscn" id="13_gj5ie"]
-[ext_resource type="PackedScene" path="res://door.tscn" id="14_xgj7h"]
+[ext_resource type="PackedScene" uid="uid://bmkaap53lkjyo" path="res://walker_enemy.tscn" id="11_lwtrp"]
+[ext_resource type="PackedScene" uid="uid://pfiioya6orke" path="res://pressure_plate.tscn" id="13_gj5ie"]
+[ext_resource type="PackedScene" uid="uid://ddp0oi1gujx8b" path="res://door.tscn" id="14_xgj7h"]
 [ext_resource type="PackedScene" uid="uid://56x833c7fq1n" path="res://box.tscn" id="15_lwtrp"]
-[ext_resource type="PackedScene" path="res://cocoon.tscn" id="17_b6mm4"]
+[ext_resource type="PackedScene" uid="uid://tt1ch6og7d3r" path="res://cocoon.tscn" id="17_b6mm4"]
 [ext_resource type="PackedScene" uid="uid://bte83xr2yhpak" path="res://goal.tscn" id="18_53i3p"]
 [ext_resource type="PackedScene" uid="uid://dpjnvutc156vw" path="res://nectar.tscn" id="22_87kea"]
 [ext_resource type="Script" uid="uid://cxk25ooyj5uy7" path="res://level_authoring.gd" id="23_dk80r"]
@@ -971,7 +971,7 @@ push_strength = 0
 
 [node name="WalkerEnemy" parent="Enemies" unique_id=1611463794 instance=ExtResource("11_lwtrp")]
 position = Vector2(744, 552)
-movement_pattern = Array[int]([3, 2])
+movement_pattern = Array[int]([3, 3, 2, 2])
 
 [node name="Objects" type="Node2D" parent="." unique_id=1596570283]
 

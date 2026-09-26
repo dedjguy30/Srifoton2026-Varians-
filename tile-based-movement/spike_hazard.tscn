@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://dimeqmvqlubui"]
 
 [ext_resource type="Script" uid="uid://cu3o6pje17w65" path="res://spike_hazard.gd" id="1_84dj7"]
-[ext_resource type="Texture2D" uid="uid://3rym8vjf5fyy" path="res://icon.svg" id="2_oc7kk"]
+[ext_resource type="Texture2D" uid="uid://sa68pjgx6yd3" path="res://asetSprite/Spike.png" id="2_oc7kk"]
 
 [node name="SpikeHazard" type="Node2D" unique_id=529503518]
 script = ExtResource("1_84dj7")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=522878022]
-scale = Vector2(0.2, 0.2)
+scale = Vector2(0.05, 0.05)
 texture = ExtResource("2_oc7kk")
