@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://cedsrnc1h26cb"
+path="res://.godot/imported/Voice9.wav-cc3d0d5cf23b06d5a22ed61ac1759464.sample"
+
+[deps]
+
+source_file="res://aset/Ninja Adventure - Asset Pack/Ninja Adventure - Asset Pack/Audio/Sounds/Voice/Voice9.wav"
+dest_files=["res://.godot/imported/Voice9.wav-cc3d0d5cf23b06d5a22ed61ac1759464.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

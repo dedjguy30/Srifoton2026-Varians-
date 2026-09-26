@@ -13,4 +13,3 @@ https://twitter.com/SnowHexi
 
 Please rate this pack ♥!
 https://snowhex.itch.io/harvest-summer-forest-pack/rate
-

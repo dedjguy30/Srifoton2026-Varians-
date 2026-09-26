@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://3ts37b0253jd"
+path="res://.godot/imported/Water8.wav-c11ce8be6a4e715fd39b28522d40e69f.sample"
+
+[deps]
+
+source_file="res://aset/Ninja Adventure - Asset Pack/Ninja Adventure - Asset Pack/Audio/Sounds/Elemental/Water8.wav"
+dest_files=["res://.godot/imported/Water8.wav-c11ce8be6a4e715fd39b28522d40e69f.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2
