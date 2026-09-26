@@ -1,6 +1,41 @@
 [gd_scene format=3 uid="uid://b4oa2kdto4q1a"]
 
 [ext_resource type="Script" uid="uid://bbuqkrcykwt2h" path="res://menus/level_select.gd" id="1_x5a0v"]
+[ext_resource type="Texture2D" uid="uid://cfs0mpv7n7so8" path="res://asetSprite/Screenshot 2026-09-26 132824.png" id="2_a00cd"]
+[ext_resource type="FontFile" uid="uid://b6142fia1flpi" path="res://aset/Godot-Fontpack-d244bf6170b399a6d4d26a0d906058ddf2dafdf1/fonts/connection_ii/ConnectionII.otf" id="3_ihgok"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_an5vc"]
+bg_color = Color(0.026749037, 0.12956318, 0.30551058, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ihgok"]
+bg_color = Color(0.23424569, 0.47965133, 0.8991955, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a00cd"]
+bg_color = Color(0.1112225, 0.3133231, 0.65808934, 1)
+border_color = Color(0.09382794, 0.93816876, 0.68310493, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_opf47"]
+bg_color = Color(0.58301485, 0.73218334, 0.9805376, 1)
+
+[sub_resource type="Theme" id="Theme_a00cd"]
+default_font = ExtResource("3_ihgok")
+default_font_size = 20
+Button/colors/icon_hover_color = Color(1, 1, 1, 1)
+Button/colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
+Button/colors/icon_normal_color = Color(1, 1, 1, 1)
+Button/styles/disabled = SubResource("StyleBoxFlat_an5vc")
+Button/styles/hover = SubResource("StyleBoxFlat_ihgok")
+Button/styles/normal = SubResource("StyleBoxFlat_a00cd")
+Button/styles/pressed = SubResource("StyleBoxFlat_opf47")
+
+[sub_resource type="LabelSettings" id="LabelSettings_a00cd"]
+font_size = 80
+shadow_size = 8
+shadow_color = Color(0.64486665, 0.768769, 0, 0.7647059)
 
 [node name="LevelSelect" type="Control" unique_id=27507480]
 layout_mode = 3
@@ -9,9 +44,107 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = SubResource("Theme_a00cd")
 script = ExtResource("1_x5a0v")
 
+[node name="Background" type="TextureRect" parent="." unique_id=110786079]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_a00cd")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="BackgroundOverlay" type="ColorRect" parent="." unique_id=1171750642]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.5568628)
+
+[node name="TitleArea" type="CenterContainer" parent="." unique_id=1022673396]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 70.0
+offset_bottom = 249.0
+grow_horizontal = 2
+pivot_offset = Vector2(0, 110)
+
+[node name="GameTitle" type="Label" parent="TitleArea" unique_id=1834099255]
+layout_mode = 2
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("3_ihgok")
+text = "NECTAR PALS
+"
+label_settings = SubResource("LabelSettings_a00cd")
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="CenterContainer" type="CenterContainer" parent="." unique_id=2042536221]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 30.0
+offset_bottom = 30.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LevelArea" type="VBoxContainer" parent="CenterContainer" unique_id=503411734]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="CenterContainer/LevelArea" unique_id=1771729998]
+layout_mode = 2
+text = "SELECT LEVEL"
+
+[node name="ProgressLabel" type="Label" parent="CenterContainer/LevelArea" unique_id=778215166]
+layout_mode = 2
+text = "RESET PROGRESS"
+
+[node name="LevelButtons" type="VBoxContainer" parent="CenterContainer/LevelArea" unique_id=1467509982]
+layout_mode = 2
+
+[node name="TopRightControl" type="HBoxContainer" parent="." unique_id=1494582363]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -704.0
+offset_bottom = 44.0
+grow_horizontal = 0
+pivot_offset = Vector2(-180, 16)
+pivot_offset_ratio = Vector2(-16, 0)
+theme_override_constants/separation = 8
+
+[node name="GuideButton" type="Button" parent="TopRightControl" unique_id=1134904359]
+custom_minimum_size = Vector2(160, 44)
+layout_mode = 2
+text = "GUIDE"
+
+[node name="ResetProgress" type="Button" parent="TopRightControl" unique_id=1545632989]
+custom_minimum_size = Vector2(160, 44)
+layout_mode = 2
+text = "RESET PROGRESS"
+
+[node name="FreeplayButton" type="Button" parent="TopRightControl" unique_id=797152336]
+custom_minimum_size = Vector2(160, 44)
+layout_mode = 2
+text = "UNLOCK ALL LEVELS"
+
+[node name="CreditButton" type="Button" parent="TopRightControl" unique_id=63633262]
+custom_minimum_size = Vector2(160, 44)
+layout_mode = 2
+text = "CREDIT"
+
+[node name="CreditOverlay" type="Control" parent="." unique_id=1450484976]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -19,20 +152,80 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer" unique_id=503411734]
+[node name="Background" type="ColorRect" parent="CreditOverlay" unique_id=2019316762]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="CreditOverlay" unique_id=149914087]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="CreditOverlay/CenterContainer" unique_id=1786526723]
+custom_minimum_size = Vector2(820, 420)
 layout_mode = 2
 
-[node name="Title" type="Label" parent="CenterContainer/VBoxContainer" unique_id=1771729998]
-layout_mode = 2
-text = "SELECT LEVEL"
-
-[node name="ProgressLabel" type="Label" parent="CenterContainer/VBoxContainer" unique_id=778215166]
-layout_mode = 2
-text = "RESET PROGRESS"
-
-[node name="LevelButtons" type="VBoxContainer" parent="CenterContainer/VBoxContainer" unique_id=1467509982]
+[node name="VBoxContainer" type="VBoxContainer" parent="CreditOverlay/CenterContainer/PanelContainer" unique_id=1015022321]
 layout_mode = 2
 
-[node name="ResetProgress" type="Button" parent="CenterContainer/VBoxContainer" unique_id=1545632989]
+[node name="CreditTitle" type="Label" parent="CreditOverlay/CenterContainer/PanelContainer/VBoxContainer" unique_id=896742566]
 layout_mode = 2
-text = "RESET PROGRESS"
+text = "CREDITS"
+horizontal_alignment = 1
+
+[node name="CreditText" type="RichTextLabel" parent="CreditOverlay/CenterContainer/PanelContainer/VBoxContainer/CreditTitle" unique_id=289048582]
+custom_minimum_size = Vector2(560, 280)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -410.0
+offset_top = 70.0
+offset_right = 410.0
+offset_bottom = 370.0
+grow_horizontal = 2
+bbcode_enabled = true
+text = "TileSet
+1. Pixel Frog
+Source: https://pixelfrog-assets.itch.io/tiny-swords
+
+Assets
+1. SnowHex
+Source: https://snowhex.itch.io/harvest-summer-forest-pack
+2.Game Endeavor
+Source: https://game-endeavor.itch.io/mystic-woods
+3. Mochii
+Source: https://pixelmochii.itch.io/mochii-plains
+4. CraftPix.Net
+Source: https://craftpix.net/product/grassland-top-down-tileset-pixel-art/?srsltid=AU7gw4Ux9B-P1cc_F_GHsc8K2Zv9m-vwAipNJozKRFwmvw1y2VqWf3tA
+5. pixel-boy
+Source: https://pixel-boy.itch.io/ninja-adventure-asset-pack?download
+6. Starmixu
+Source: https://starmixu.itch.io/little-dreamyland-asset-pack
+
+Music and Sound Effects
+1. Towball
+Source: https://towball.itch.io/towballs-crossing-deluxe
+2. Leopaz
+Source: https://leohpaz.itch.io/rpg-essentials-sfx-free
+
+Font
+Godot Engine 
+Nama Font: Connection II
+Source: https://godotengine.org/asset-library/asset/316 
+
+"
+
+[node name="CloseButton" type="Button" parent="CreditOverlay/CenterContainer/PanelContainer/VBoxContainer" unique_id=1172735633]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "CLOSE"

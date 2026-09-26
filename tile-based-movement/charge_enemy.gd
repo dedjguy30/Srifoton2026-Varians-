@@ -80,6 +80,9 @@ func take_turn() -> void:
 	var target: GridCharacter = (
 		find_visible_character()
 	)
+	set_alert_detected(
+	target != null
+)
 
 	if target == null:
 		print(

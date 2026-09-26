@@ -74,6 +74,8 @@ size = Vector2(48, 48)
 position = Vector2(64, 64)
 scale = Vector2(2, 2)
 script = ExtResource("1_c67oh")
+active_indicator_offset = Vector2(0, -45)
+active_indicator_scale = Vector2(1.8, 1.8)
 
 [node name="Sprite2D" type="AnimatedSprite2D" parent="." unique_id=1939238817]
 z_index = 1

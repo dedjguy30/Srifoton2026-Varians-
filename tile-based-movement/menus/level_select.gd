@@ -9,20 +9,38 @@ const GUIDE_FOLDER: String = "res://guide/"
 )
 
 @onready var progress_label: Label = (
-	$CenterContainer/VBoxContainer/ProgressLabel
+	$CenterContainer/LevelArea/ProgressLabel
 )
 
 @onready var level_buttons: VBoxContainer = (
-	$CenterContainer/VBoxContainer/LevelButtons
+	$CenterContainer/LevelArea/LevelButtons
 )
 
 @onready var reset_button: Button = (
-	$CenterContainer/VBoxContainer/ResetProgress
+	$TopRightControl/ResetProgress
+)
+
+@onready var credit_button: Button = (
+	$TopRightControl/CreditButton
+)
+
+@onready var credit_overlay: Control = (
+	$CreditOverlay
+)
+
+@onready var close_credit_button: Button = (
+	$CreditOverlay/CenterContainer/PanelContainer/VBoxContainer/CloseButton
+)
+
+@onready var guide_button: Button = (
+	$TopRightControl/GuideButton
+)
+
+@onready var free_play_button: Button = (
+	$TopRightControl/FreeplayButton
 )
 
 
-var free_play_button: Button
-var guide_button: Button
 
 
 # ==================================================
@@ -44,80 +62,34 @@ var guide_index: int = 0
 
 func _ready() -> void:
 	AudioManager.play_menu_bgm()
-	_create_free_play_button()
-	_create_guide_button()
+
+	guide_button.pressed.connect(
+		_on_guide_pressed
+	)
+	
+	free_play_button.pressed.connect(
+		_on_free_play_pressed
+	)
 
 	reset_button.pressed.connect(
 		_on_reset_progress_pressed
 	)
+	
+	credit_button.pressed.connect(
+		_on_credit_pressed
+	)
+	
+	close_credit_button.pressed.connect(
+		_on_close_credit_pressed
+	)
+
+	credit_overlay.visible = false
 
 	LevelFlow.progress_changed.connect(
 		_rebuild_level_buttons
 	)
 
 	_rebuild_level_buttons()
-
-
-# ==================================================
-# UNLOCK ALL LEVELS BUTTON
-# ==================================================
-
-func _create_free_play_button() -> void:
-	free_play_button = Button.new()
-
-	free_play_button.name = "FreePlayButton"
-
-	free_play_button.custom_minimum_size = Vector2(
-		220,
-		48
-	)
-
-	free_play_button.pressed.connect(
-		_on_free_play_pressed
-	)
-
-	vbox.add_child(
-		free_play_button
-	)
-
-	vbox.move_child(
-		free_play_button,
-		reset_button.get_index()
-	)
-
-
-# ==================================================
-# GUIDE BUTTON
-# ==================================================
-
-func _create_guide_button() -> void:
-	guide_button = Button.new()
-
-	guide_button.name = "GuideButton"
-	guide_button.text = "GUIDE"
-
-	guide_button.custom_minimum_size = Vector2(
-		140,
-		44
-	)
-
-	guide_button.set_anchors_preset(
-		Control.PRESET_TOP_RIGHT
-	)
-
-	guide_button.offset_left = -156
-	guide_button.offset_top = 16
-	guide_button.offset_right = -16
-	guide_button.offset_bottom = 60
-
-	guide_button.pressed.connect(
-		_on_guide_pressed
-	)
-
-	add_child(
-		guide_button
-	)
-
 
 # ==================================================
 # LEVEL BUTTONS
@@ -253,6 +225,14 @@ func _on_guide_pressed() -> void:
 
 	_show_guide_slide()
 
+#==========
+# CREDITS
+#===========
+func _on_credit_pressed() -> void:
+	credit_overlay.visible = true
+
+func _on_close_credit_pressed() -> void:
+	credit_overlay.visible = false
 
 # ==================================================
 # FIND GUIDE IMAGES

@@ -10,14 +10,14 @@
 [ext_resource type="Script" uid="uid://bmttx0nsahku2" path="res://caterpilar.gd" id="8_thh07"]
 [ext_resource type="PackedScene" uid="uid://cjvseacp3hjh4" path="res://beetle.tscn" id="9_ivanv"]
 [ext_resource type="PackedScene" uid="uid://dc0poe8rtau33" path="res://grasshopper.tscn" id="10_8td5s"]
-[ext_resource type="PackedScene" path="res://chaser_enemy.tscn" id="11_0tfsk"]
+[ext_resource type="PackedScene" uid="uid://co7ikqfckxsk0" path="res://chaser_enemy.tscn" id="11_0tfsk"]
 [ext_resource type="PackedScene" uid="uid://d0usq2eunj1fv" path="res://charge_enemy.tscn" id="12_gpcmx"]
-[ext_resource type="PackedScene" path="res://cocoon.tscn" id="13_b5k1s"]
+[ext_resource type="PackedScene" uid="uid://tt1ch6og7d3r" path="res://cocoon.tscn" id="13_b5k1s"]
 [ext_resource type="PackedScene" uid="uid://bte83xr2yhpak" path="res://goal.tscn" id="14_7bnun"]
 [ext_resource type="PackedScene" uid="uid://56x833c7fq1n" path="res://box.tscn" id="15_qrupw"]
-[ext_resource type="PackedScene" path="res://door.tscn" id="16_7o3qy"]
+[ext_resource type="PackedScene" uid="uid://ddp0oi1gujx8b" path="res://door.tscn" id="16_7o3qy"]
 [ext_resource type="PackedScene" uid="uid://dcd6iqk0lwn0o" path="res://pit_hazard.tscn" id="17_7lfl5"]
-[ext_resource type="PackedScene" path="res://pressure_plate.tscn" id="18_y27tq"]
+[ext_resource type="PackedScene" uid="uid://pfiioya6orke" path="res://pressure_plate.tscn" id="18_y27tq"]
 [ext_resource type="PackedScene" uid="uid://dimeqmvqlubui" path="res://spike_hazard.tscn" id="19_4yo83"]
 [ext_resource type="PackedScene" uid="uid://dpjnvutc156vw" path="res://nectar.tscn" id="20_l6lqw"]
 [ext_resource type="Script" uid="uid://cxk25ooyj5uy7" path="res://level_authoring.gd" id="21_lvuwt"]
@@ -1062,7 +1062,7 @@ required_plates = 3
 [node name="Collecibles" type="Node2D" parent="." unique_id=403704943]
 
 [node name="Nectar" parent="Collecibles" unique_id=502529762 instance=ExtResource("20_l6lqw")]
-position = Vector2(528, 528)
+position = Vector2(1128, 360)
 
 [node name="Nectar2" parent="Collecibles" unique_id=1837724417 instance=ExtResource("20_l6lqw")]
 position = Vector2(120, 456)

@@ -33,6 +33,9 @@ func take_turn() -> void:
 	var target: GridCharacter = (
 		find_nearest_character()
 	)
+	set_alert_detected(
+	target != null
+)
 
 
 	# ==================================================

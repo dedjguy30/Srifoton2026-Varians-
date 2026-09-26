@@ -50,8 +50,11 @@ var death_sprite_home_scale: Vector2
 var death_sprite_home_rotation: float
 var death_sprite_home_modulate: Color
 var active_indicator: Polygon2D
-
-
+@export var active_indicator_offset: Vector2 = Vector2(
+	0,
+	-25
+)
+@export var active_indicator_scale: Vector2 = Vector2.ONE
 # ==================================================
 # READY
 # ==================================================
@@ -124,11 +127,8 @@ func create_active_indicator() -> void:
 		1.0
 	)
 
-	active_indicator.position = Vector2(
-		0,
-		-25
-	)
-
+	active_indicator.position = active_indicator_offset
+	active_indicator.scale = active_indicator_scale
 	active_indicator.z_index = 10
 	active_indicator.visible = false
 

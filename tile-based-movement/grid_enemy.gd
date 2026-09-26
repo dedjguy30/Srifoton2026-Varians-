@@ -28,7 +28,7 @@ const AFTERIMAGE_ALPHA: float = 0.42
 
 var grid_position: Vector2i = Vector2i.ZERO
 var is_alive: bool = true
-
+var alert_indicator: Label
 var skip_next_turn: bool = false
 
 # HANYA untuk visual.
@@ -85,8 +85,51 @@ func _ready() -> void:
 		board.turn_about_to_commit.connect(
 			_on_turn_about_to_commit
 		)
+		create_alert_indicator()
+func create_alert_indicator() -> void:
+	alert_indicator = Label.new()
+
+	alert_indicator.name = "AlertIndicator"
+	alert_indicator.text = "!"
+
+	alert_indicator.position = Vector2(
+		12,
+		-32
+	)
+
+	alert_indicator.z_index = 20
+	alert_indicator.visible = false
+
+	alert_indicator.add_theme_font_size_override(
+		"font_size",
+		40
+	)
+
+	alert_indicator.add_theme_color_override(
+		"font_color",
+		Color(
+			1.0,
+			0.2,
+			0.15,
+			1.0
+		)
+	)
+
+	add_child(
+		alert_indicator
+	)
 
 
+func set_alert_detected(
+	value: bool
+) -> void:
+	if alert_indicator == null:
+		return
+
+	alert_indicator.visible = (
+		value
+		and is_alive
+	)
 # ==================================================
 # TURN
 # ==================================================
